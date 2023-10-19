@@ -1,0 +1,55 @@
+name: Torchsparse Post-Commit
+on:
+  push:
+    branches:
+      - zendar-main
+      - arager/wheelies
+  workflow_dispatch:
+  workflow_call:
+jobs:
+  build:
+    name: Build Wheel for Torchsparse
+    runs-on:
+      - self-hosted
+      - amd_2004_runner_v3
+    timeout-minutes: 30
+    outputs:
+      wheel: "${{ steps.build.wheelfile }}"
+    env:
+      PDM_DIR: __pdm
+      PDM: __pdm/bin/pdm
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install PDM
+        shell: bash
+        run: |
+          curl \
+            -sSL \
+            -o install-pdm.py \
+            https://raw.githubusercontent.com/pdm-project/pdm/2.5.3/install-pdm.py
+          python3 install-pdm.py --path "${PDM_DIR}"
+      - name: PDM Sync
+        shell: bash
+        run: |
+          "${PDM}" sync --clean
+      - name: Build Wheel
+        shell: bash
+        run: |
+          "${PDM}" build
+      - name: Locate Wheel
+        id: locate
+        shell: bash
+        run: |
+          find dist -mindepth 1 -name '*.whl' \
+          | xargs printf "wheel=%s\n" \
+          >> "${GITHUB_OUTPUT}"
+
+          find dist -mindepth 1 -name '*.whl' \
+          | xargs basename \
+          | xargs printf "name=%s\n" \
+          >> "${GITHUB_OUTPUT}"
+      - name: Archive Wheel
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.locate.outputs.name }}
+          path: ${{ steps.locate.outputs.wheel }}
