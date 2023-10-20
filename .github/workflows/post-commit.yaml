@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - zendar-main
-      - arager/wheelies
   workflow_dispatch:
   workflow_call:
 jobs:
