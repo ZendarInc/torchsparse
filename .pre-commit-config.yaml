@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
         name: (Common) Remove trailing whitespaces
@@ -27,29 +27,29 @@ repos:
       - id: check-toml
         name: (TOML) Check syntax
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.19.4
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         name: (Python) Update syntax for newer versions
         args: ['--py36-plus']
   - repo: https://github.com/google/yapf
-    rev: v0.31.0
+    rev: v0.40.2
     hooks:
       - id: yapf
         name: (Python) Format with yapf
   - repo: https://github.com/pycqa/isort
-    rev: 5.8.0
+    rev: 5.12.0
     hooks:
       - id: isort
         name: (Python) Sort imports with isort
   - repo: https://github.com/pycqa/flake8
-    rev: 3.9.2
+    rev: 6.1.0
     hooks:
       - id: flake8
         name: (Python) Check with flake8
         additional_dependencies: [flake8-bugbear, flake8-comprehensions, flake8-docstrings, flake8-executable, flake8-quotes]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.902
+    rev: v1.6.1
     hooks:
       - id: mypy
         name: (Python) Check with mypy

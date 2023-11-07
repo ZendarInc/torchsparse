@@ -3,10 +3,24 @@
 # inconsistencies.
 
 [[tool.pdm.source]]
-url = "https://download.pytorch.org/whl/cu117/torch"
+url = "https://download.pytorch.org/whl/cu117"
 verify_ssl = true
 name = "torch-cu117"
 type = "find-links"
+
+
+[project]
+name = "torchsparse"
+description = ""
+authors = []
+dependencies = ["torch==2.0.0+cu117", "tqdm", "numpy", "setuptools"]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "MIT"}
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = {attr = "torchsparse.__version__"}
 
 [build-system]
 requires = ["torch==2.0.0+cu117", "tqdm", "numpy", "setuptools"]
