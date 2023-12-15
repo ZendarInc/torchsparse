@@ -19,6 +19,31 @@ jobs:
       PDM: __pdm/bin/pdm
     steps:
       - uses: actions/checkout@v3
+      - name: Install CUDA 12.1.1
+        shell: bash
+        run: |
+          pushd ..
+          INSTALLER=cuda_12.1.1_530.30.02_linux.run
+          VERSION=12.1.1
+          BASE=https://developer.download.nvidia.com/compute/cuda
+          SHASUM=d74022d41d80105319dfa21beea39b77a5b9919539c0487a05caaf2446d6a70e
+
+          if sha256sum ${INSTALLER} \
+              | awk '/^'"${SHASUM}"' *'"${INSTALLER}"'$/'
+          then
+            echo "Already downloaded the installer, reusing"
+          else
+            wget ${BASE}/${VERSION}/local_installers/${INSTALLER}
+          fi
+
+          chmod +x ./${INSTALLER}
+
+          echo "running installer $(pwd)/${INSTALLER}; unpacking in $(pwd)/cuda"
+
+          mkdir -p cuda
+          ./${INSTALLER} --toolkit --silent --installpath=$(pwd)/cuda
+
+          popd
       - name: Install PDM
         shell: bash
         run: |
@@ -30,10 +55,16 @@ jobs:
       - name: PDM Sync
         shell: bash
         run: |
+          CUDA_PATH="$(pwd | xargs dirname)/cuda"
+          LD_LIBRARY_PATH="${CUDA_PATH}/lib64"
+          export CUDA_PATH LD_LIBRARY_PATH
           "${PDM}" sync --clean
       - name: Build Wheel
         shell: bash
         run: |
+          CUDA_PATH="$(pwd | xargs dirname)/cuda"
+          LD_LIBRARY_PATH="${CUDA_PATH}/lib64"
+          export CUDA_PATH LD_LIBRARY_PATH
           "${PDM}" build
       - name: Locate Wheel
         id: locate
