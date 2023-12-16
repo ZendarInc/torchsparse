@@ -6,31 +6,7 @@ groups = ["default"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
-content_hash = "sha256:626b4aef06b3fec39532353de747a92460a21fe45dcc4a167ac6b265e3fde945"
-
-[[package]]
-name = "cmake"
-version = "3.27.7"
-summary = "CMake is an open-source, cross-platform family of tools designed to build, test and package software"
-files = [
-    {file = "cmake-3.27.7-py2.py3-none-macosx_10_10_universal2.macosx_10_10_x86_64.macosx_11_0_arm64.macosx_11_0_universal2.whl", hash = "sha256:d582ef3e9ff0bd113581c1a32e881d1c2f9a34d2de76c93324a28593a76433db"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2010_i686.manylinux_2_12_i686.whl", hash = "sha256:8056c99e371ff57229df2068364d7c32fea716cb53b4675f639edfb62663decf"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:68983b09de633fc1ce6ab6bce9a25bfa181e41598e7c6bc0a6c0108773ee01cb"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:8bd1e1fa4fc8de7605c663d9408dceb649112f855aab05cca31fdb72e4d78364"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2014_i686.manylinux_2_17_i686.whl", hash = "sha256:c981aafcca2cd7210bd210ec75710c0f34e1fde1998cdcab812e4133e3ab615d"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2014_ppc64le.manylinux_2_17_ppc64le.whl", hash = "sha256:1b9067ce0251cba3d4c018f2e1577ba9078e9c1eff6ad607ad5ce867843d4571"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2014_s390x.manylinux_2_17_s390x.whl", hash = "sha256:b8a2fcb619b89d1cce7b52828316de9a1f27f0c90c2e39d1eae886428c8ee8c6"},
-    {file = "cmake-3.27.7-py2.py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:499b38c77d52fb1964dbb38d0228fed246263a181939a8e753fde8ca227c8e1e"},
-    {file = "cmake-3.27.7-py2.py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:2fb48c780f1a6a3d19e785ebbb754be79d369e25a1cb81043fab049e709564da"},
-    {file = "cmake-3.27.7-py2.py3-none-musllinux_1_1_i686.whl", hash = "sha256:7bf96237ba11ce2437dc5e071d96b510120a1be4708c631a64b2f38fb46bbd77"},
-    {file = "cmake-3.27.7-py2.py3-none-musllinux_1_1_ppc64le.whl", hash = "sha256:009058bdf4f488709f38eaa5dd0ef0f89c6b9c6b6edd9d5b475a308ef75f80bb"},
-    {file = "cmake-3.27.7-py2.py3-none-musllinux_1_1_s390x.whl", hash = "sha256:591f6b056527aefec009bc61a388776b2fc62444deb0038112a471031f61aeca"},
-    {file = "cmake-3.27.7-py2.py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:bd40d46dbad3555d5b3ce054bef24b85f256b19139493773751ab6f2b71c1219"},
-    {file = "cmake-3.27.7-py2.py3-none-win32.whl", hash = "sha256:bdbf0256f554f68c7b1d9740f5d059daf875b685c81a479cbe69038e84eb2fb9"},
-    {file = "cmake-3.27.7-py2.py3-none-win_amd64.whl", hash = "sha256:810e592b606d05a3080a9c19ea839b13226f62cae447a22485b2365782f6b926"},
-    {file = "cmake-3.27.7-py2.py3-none-win_arm64.whl", hash = "sha256:72289361866314f73be2ae63ddee224ff70223dcef9feb66d0072bf17e245564"},
-    {file = "cmake-3.27.7.tar.gz", hash = "sha256:9f4a7c7be2a25de5901f045618f41b833ea6c0f647115201d38e4fdf7e2815bc"},
-]
+content_hash = "sha256:d824781e0841e1a0a58654f6a7025ae5cce6e8a816c90de70e9b129f7ba41c33"
 
 [[package]]
 name = "colorama"
@@ -44,12 +20,22 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.12.4"
+version = "3.13.1"
 requires_python = ">=3.8"
 summary = "A platform independent file lock."
 files = [
-    {file = "filelock-3.12.4-py3-none-any.whl", hash = "sha256:08c21d87ded6e2b9da6728c3dff51baf1dcecf973b768ef35bcbc3447edb9ad4"},
-    {file = "filelock-3.12.4.tar.gz", hash = "sha256:2e6f249f1f3654291606e046b09f1fd5eac39b360664c27f5aad072012f8bcbd"},
+    {file = "filelock-3.13.1-py3-none-any.whl", hash = "sha256:57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c"},
+    {file = "filelock-3.13.1.tar.gz", hash = "sha256:521f5f56c50f8426f5e03ad3b281b490a87ef15bc6c526f168290f0c7148d44e"},
+]
+
+[[package]]
+name = "fsspec"
+version = "2023.12.2"
+requires_python = ">=3.8"
+summary = "File-system specification"
+files = [
+    {file = "fsspec-2023.12.2-py3-none-any.whl", hash = "sha256:d800d87f72189a745fa3d6b033b9dc4a34ad069f60ca60b943a63599f5501960"},
+    {file = "fsspec-2023.12.2.tar.gz", hash = "sha256:8548d39e8810b59c38014934f6b31e57f40c1b20f911f4cc2b85389c7e9bf0cb"},
 ]
 
 [[package]]
@@ -63,14 +49,6 @@ dependencies = [
 files = [
     {file = "Jinja2-3.1.2-py3-none-any.whl", hash = "sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61"},
     {file = "Jinja2-3.1.2.tar.gz", hash = "sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852"},
-]
-
-[[package]]
-name = "lit"
-version = "17.0.3"
-summary = "A Software Testing Tool"
-files = [
-    {file = "lit-17.0.3.tar.gz", hash = "sha256:e6049032462be1e2928686cbd4a6cc5b3c545d83ecd078737fe79412c1f3fcc1"},
 ]
 
 [[package]]
@@ -189,12 +167,12 @@ files = [
 
 [[package]]
 name = "setuptools"
-version = "68.2.2"
+version = "69.0.2"
 requires_python = ">=3.8"
 summary = "Easily download, build, install, upgrade, and uninstall Python packages"
 files = [
-    {file = "setuptools-68.2.2-py3-none-any.whl", hash = "sha256:b454a35605876da60632df1a60f736524eb73cc47bbc9f3f1ef1b644de74fd2a"},
-    {file = "setuptools-68.2.2.tar.gz", hash = "sha256:4ac1475276d2f1c48684874089fefcd83bd7162ddaafb81fac866ba0db282a87"},
+    {file = "setuptools-69.0.2-py3-none-any.whl", hash = "sha256:1e8fdff6797d3865f37397be788a4e3cba233608e9b509382a2777d25ebde7f2"},
+    {file = "setuptools-69.0.2.tar.gz", hash = "sha256:735896e78a4742605974de002ac60562d286fa8051a7e2299445e8e8fbb01aa6"},
 ]
 
 [[package]]
@@ -212,26 +190,27 @@ files = [
 
 [[package]]
 name = "torch"
-version = "2.0.0+cu117"
+version = "2.1.2+cu121"
 requires_python = ">=3.8.0"
 summary = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
 dependencies = [
     "filelock",
+    "fsspec",
     "jinja2",
     "networkx",
     "sympy",
-    "triton==2.0.0; platform_system == \"Linux\" and platform_machine == \"x86_64\"",
+    "triton==2.1.0; platform_system == \"Linux\" and platform_machine == \"x86_64\"",
     "typing-extensions",
 ]
 files = [
-    {file = "torch-2.0.0+cu117-cp310-cp310-linux_x86_64.whl", hash = "sha256:f6e26492d214edab5b407e903ed3c7b190ac5709330bd72060d1be01b354c198"},
-    {file = "torch-2.0.0+cu117-cp310-cp310-win_amd64.whl", hash = "sha256:a9f086988e659674ac85d4495f5fb5e6dc9a64b99746277e760792fa44010097"},
-    {file = "torch-2.0.0+cu117-cp311-cp311-linux_x86_64.whl", hash = "sha256:b078675648025f1dae1cdc8955f975f5ca81167809e9662b1481e456171ebfb9"},
-    {file = "torch-2.0.0+cu117-cp311-cp311-win_amd64.whl", hash = "sha256:f0b525686f25c30e1de87d0fbdcd0b373f4c70a0f72bd854389e601a52fdc5e5"},
-    {file = "torch-2.0.0+cu117-cp38-cp38-linux_x86_64.whl", hash = "sha256:c4dbc3f7f3eff6576473c3711d5d99adaaef733490b39de4970980d6edf4f0c2"},
-    {file = "torch-2.0.0+cu117-cp38-cp38-win_amd64.whl", hash = "sha256:64c176ebff6904155aa6f72b0f996c9ea17f29b8af7aa9afeee8bff726f91ef3"},
-    {file = "torch-2.0.0+cu117-cp39-cp39-linux_x86_64.whl", hash = "sha256:726cf790bf5730d89c05fe80c1c64f9cf02d09180da1891ee78ecd5891acadcd"},
-    {file = "torch-2.0.0+cu117-cp39-cp39-win_amd64.whl", hash = "sha256:19e17e9ea7fb3e1cbd5c8585cf18300653216bcd27858825dc93b74e5495360a"},
+    {file = "torch-2.1.2+cu121-cp310-cp310-linux_x86_64.whl", hash = "sha256:b2184b7729ef3b9b10065c074a37c1e603fd99f91e38376e25cb7ed6e1d54696"},
+    {file = "torch-2.1.2+cu121-cp310-cp310-win_amd64.whl", hash = "sha256:9925143dece0e63c5404a72d59eb668ef78795418e96b576f94d75dcea6030b9"},
+    {file = "torch-2.1.2+cu121-cp311-cp311-linux_x86_64.whl", hash = "sha256:ca05cae9334504d1903e16c50ddf045329a859d5b1a27ed2dc1d58ed066df6fa"},
+    {file = "torch-2.1.2+cu121-cp311-cp311-win_amd64.whl", hash = "sha256:c92e9c559a82466fc5989f648807d2c0215bcce09b97ad7a20d038b686783229"},
+    {file = "torch-2.1.2+cu121-cp38-cp38-linux_x86_64.whl", hash = "sha256:daa179bb558f78f2165db974a6744ec8de2ea71eb6aaf362bdae7616012c0302"},
+    {file = "torch-2.1.2+cu121-cp38-cp38-win_amd64.whl", hash = "sha256:44c31fc1e470428682e212473507116ec3afa583d6b79d92858bf3dc24b334ea"},
+    {file = "torch-2.1.2+cu121-cp39-cp39-linux_x86_64.whl", hash = "sha256:eaaf6907e3723c0ca6a91df5e01a7eef8cabec93120e9a50739f5a5f14a2aa46"},
+    {file = "torch-2.1.2+cu121-cp39-cp39-win_amd64.whl", hash = "sha256:2d287804328dfb950ae6d418c9d8561d8f379237cf0710566d80efb96b6cd744"},
 ]
 
 [[package]]
@@ -249,37 +228,27 @@ files = [
 
 [[package]]
 name = "triton"
-version = "2.0.0"
+version = "2.1.0"
 summary = "A language and compiler for custom Deep Learning operations"
 dependencies = [
-    "cmake",
     "filelock",
-    "lit",
-    "torch",
 ]
 files = [
-    {file = "triton-2.0.0-1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:38806ee9663f4b0f7cd64790e96c579374089e58f49aac4a6608121aa55e2505"},
-    {file = "triton-2.0.0-1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:226941c7b8595219ddef59a1fdb821e8c744289a132415ddd584facedeb475b1"},
-    {file = "triton-2.0.0-1-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:9d4978298b74fcf59a75fe71e535c092b023088933b2f1df933ec32615e4beef"},
-    {file = "triton-2.0.0-1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:74f118c12b437fb2ca25e1a04759173b517582fcf4c7be11913316c764213656"},
-    {file = "triton-2.0.0-1-pp37-pypy37_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:9618815a8da1d9157514f08f855d9e9ff92e329cd81c0305003eb9ec25cc5add"},
-    {file = "triton-2.0.0-1-pp38-pypy38_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:1aca3303629cd3136375b82cb9921727f804e47ebee27b2677fef23005c3851a"},
-    {file = "triton-2.0.0-1-pp39-pypy39_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:e3e13aa8b527c9b642e3a9defcc0fbd8ffbe1c80d8ac8c15a01692478dc64d8a"},
-    {file = "triton-2.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8f05a7e64e4ca0565535e3d5d3405d7e49f9d308505bb7773d21fb26a4c008c2"},
-    {file = "triton-2.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bb4b99ca3c6844066e516658541d876c28a5f6e3a852286bbc97ad57134827fd"},
-    {file = "triton-2.0.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:75834f27926eab6c7f00ce73aaf1ab5bfb9bec6eb57ab7c0bfc0a23fac803b4c"},
-    {file = "triton-2.0.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0117722f8c2b579cd429e0bee80f7731ae05f63fe8e9414acd9a679885fcbf42"},
-    {file = "triton-2.0.0-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bcd9be5d0c2e45d2b7e6ddc6da20112b6862d69741576f9c3dbaf941d745ecae"},
-    {file = "triton-2.0.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:42a0d2c3fc2eab4ba71384f2e785fbfd47aa41ae05fa58bf12cb31dcbd0aeceb"},
-    {file = "triton-2.0.0-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:52c47b72c72693198163ece9d90a721299e4fb3b8e24fd13141e384ad952724f"},
+    {file = "triton-2.1.0-0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:66439923a30d5d48399b08a9eae10370f6c261a5ec864a64983bae63152d39d7"},
+    {file = "triton-2.1.0-0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:919b06453f0033ea52c13eaf7833de0e57db3178d23d4e04f9fc71c4f2c32bf8"},
+    {file = "triton-2.1.0-0-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:39f6fb6bdccb3e98f3152e3fbea724f1aeae7d749412bbb1fa9c441d474eba26"},
+    {file = "triton-2.1.0-0-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:21544e522c02005a626c8ad63d39bdff2f31d41069592919ef281e964ed26446"},
+    {file = "triton-2.1.0-0-pp37-pypy37_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:143582ca31dd89cd982bd3bf53666bab1c7527d41e185f9e3d8a3051ce1b663b"},
+    {file = "triton-2.1.0-0-pp38-pypy38_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:82fc5aeeedf6e36be4e4530cbdcba81a09d65c18e02f52dc298696d45721f3bd"},
+    {file = "triton-2.1.0-0-pp39-pypy39_pp73-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:81a96d110a738ff63339fc892ded095b31bd0d205e3aace262af8400d40b6fa8"},
 ]
 
 [[package]]
 name = "typing-extensions"
-version = "4.8.0"
+version = "4.9.0"
 requires_python = ">=3.8"
 summary = "Backported and Experimental Type Hints for Python 3.8+"
 files = [
-    {file = "typing_extensions-4.8.0-py3-none-any.whl", hash = "sha256:8f92fc8806f9a6b641eaa5318da32b44d401efaac0f6678c9bc448ba3605faa0"},
-    {file = "typing_extensions-4.8.0.tar.gz", hash = "sha256:df8e4339e9cb77357558cbdbceca33c303714cf861d1eef15e1070055ae8b7ef"},
+    {file = "typing_extensions-4.9.0-py3-none-any.whl", hash = "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"},
+    {file = "typing_extensions-4.9.0.tar.gz", hash = "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783"},
 ]
