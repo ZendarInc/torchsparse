@@ -14,7 +14,7 @@ name = "torchsparse"
 description = ""
 authors = []
 dependencies = ["torch==2.1.2+cu121", "tqdm", "numpy", "setuptools"]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {text = "MIT"}
 dynamic = ["version"]
