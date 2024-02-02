@@ -18,6 +18,10 @@ If you need to update this code, the steps to do so are:
       repositories, like `RadarProcessor`
 1. increment the `torchsparse/version.py` appropriately
 1. merge those changes into `zendar-main`
+    1. the `post-commit` github action should then build the wheel, and make it available
+       for you to download in the action summary page. unzip the file to get a
+       `.whl` file, create a github release (versioned the same as the code), and
+       attach the resulting wheel file to it.
 1. in the RadarProcessor repo, update the `pyproject.toml` file appropriately
 1. merge your changes into the develop branch in RadarProcessor
 
