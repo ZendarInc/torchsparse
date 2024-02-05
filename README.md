@@ -10,12 +10,19 @@ Here at Zendar, we rely on a fork of this repo.
 
 If you need to update this code, the steps to do so are:
 1. make the code changes required, here in `ZendarInc/torchsparse`
+   1. **note:** if any python dependencies were updated, ensure that you update
+      the `pyproject.toml` and `pdm.lock` file correctly,
+      _using the same PDM version as our CI runners_. (see `.github/workflows/post-commit.yaml`
+      for reference.)
+      the version of PDM used here likely does not match that used in other
+      repositories, like `RadarProcessor`
 1. increment the `torchsparse/version.py` appropriately
 1. merge those changes into `zendar-main`
-1. in the RadarProcessor repo, set up the submodule to be at the new head of `zendar-main`
-1. in `RadarProcessor/systems/python`, remove and then re-add the `torchsparse` package, to capture the new version
-  1. `pdm remove torchsparse`
-  1. `pdm add ../../vendor/torchsparse`
+    1. the `post-commit` github action should then build the wheel, and make it available
+       for you to download in the action summary page. unzip the file to get a
+       `.whl` file, create a github release (versioned the same as the code), and
+       attach the resulting wheel file to it.
+1. in the RadarProcessor repo, update the `pyproject.toml` file appropriately
 1. merge your changes into the develop branch in RadarProcessor
 
 
