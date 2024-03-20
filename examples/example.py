@@ -8,6 +8,7 @@ import torch.utils.data
 from torch import nn
 from torch.cuda import amp
 
+import torchsparse
 from torchsparse import SparseTensor
 from torchsparse import nn as spnn
 from torchsparse.utils.collate import sparse_collate_fn
@@ -44,6 +45,7 @@ class RandomDataset:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--amp_enabled', action='store_true')
     args = parser.parse_args()
 
@@ -72,15 +74,15 @@ if __name__ == '__main__':
         spnn.BatchNorm(32),
         spnn.ReLU(True),
         spnn.Conv3d(32, 10, 1),
-    ).cuda()
+    ).to(args.device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     scaler = amp.GradScaler(enabled=args.amp_enabled)
 
     for k, feed_dict in enumerate(dataflow):
-        inputs = feed_dict['input'].cuda()
-        labels = feed_dict['label'].cuda()
+        inputs = feed_dict['input'].to(device=args.device)
+        labels = feed_dict['label'].to(device=args.device)
 
         with amp.autocast(enabled=args.amp_enabled):
             outputs = model(inputs)
@@ -92,3 +94,25 @@ if __name__ == '__main__':
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
+
+    # enable torchsparse 2.0 inference
+    model.eval()
+    # enable fused and locality-aware memory access optimization
+    torchsparse.backends.benchmark = True  # type: ignore
+    # enable adaptive grouping optimization
+    torchsparse.tune(
+        model=model,
+        data_loader=dataflow,
+        n_samples=10,
+        collect_fn=lambda data: data['input'],
+    )
+    with torch.no_grad():
+        for k, feed_dict in enumerate(dataflow):
+            inputs = feed_dict['input'].to(device=args.device).half()
+            labels = feed_dict['label'].to(device=args.device)
+
+            with amp.autocast(enabled=True):
+                outputs = model(inputs)
+                loss = criterion(outputs.feats, labels.feats)
+
+            print(f'[inference step {k + 1}] loss = {loss.item()}')

@@ -9,10 +9,12 @@ __all__ = ['SparseTensor', 'PointTensor']
 
 class SparseTensor:
 
-    def __init__(self,
-                 feats: torch.Tensor,
-                 coords: torch.Tensor,
-                 stride: Union[int, Tuple[int, ...]] = 1) -> None:
+    def __init__(
+        self,
+        feats: torch.Tensor,
+        coords: torch.Tensor,
+        stride: Union[int, Tuple[int, ...]] = 1,
+    ) -> None:
         self.feats = feats
         self.coords = coords
         self.stride = make_ntuple(stride, ndim=3)
@@ -43,19 +45,28 @@ class SparseTensor:
     def s(self, stride: Union[int, Tuple[int, ...]]) -> None:
         self.stride = make_ntuple(stride, ndim=3)
 
+    def cpu(self):
+        self.coords = self.coords.cpu()
+        self.feats = self.feats.cpu()
+        return self
+
     def cuda(self):
-        self.feats = self.feats.cuda()
         self.coords = self.coords.cuda()
+        self.feats = self.feats.cuda()
+        return self
+
+    def half(self):
+        self.feats = self.feats.half()
         return self
 
     def detach(self):
-        self.feats = self.feats.detach()
         self.coords = self.coords.detach()
+        self.feats = self.feats.detach()
         return self
 
     def to(self, device: str, non_blocking: bool = True):
-        self.feats = self.feats.to(device, non_blocking=non_blocking)
         self.coords = self.coords.to(device, non_blocking=non_blocking)
+        self.feats = self.feats.to(device, non_blocking=non_blocking)
         return self
 
     def __add__(self, other):
