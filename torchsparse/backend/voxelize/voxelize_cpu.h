@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TORCHSPARSE_VOXELIZE_CPU
+#define TORCHSPARSE_VOXELIZE_CPU
 
 #include <torch/torch.h>
 
@@ -8,3 +9,5 @@ at::Tensor voxelize_forward_cpu(const at::Tensor inputs, const at::Tensor idx,
 at::Tensor voxelize_backward_cpu(const at::Tensor top_grad,
                                  const at::Tensor idx, const at::Tensor counts,
                                  const int N);
+
+#endif

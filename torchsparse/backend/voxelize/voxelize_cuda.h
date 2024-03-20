@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TORCHSPARSE_VOXELIZE_CUDA
+#define TORCHSPARSE_VOXELIZE_CUDA
 
 #include <torch/torch.h>
 
@@ -9,9 +10,4 @@ at::Tensor voxelize_backward_cuda(const at::Tensor top_grad,
                                   const at::Tensor idx, const at::Tensor counts,
                                   const int N);
 
-void to_dense_forward_cuda(const at::Tensor inputs, const at::Tensor idx,
-                           const at::Tensor range, at::Tensor outputs);
-
-void to_dense_backward_cuda(const at::Tensor top_grad,
-                            const at::Tensor idx, const at::Tensor range,
-                            const at::Tensor bottom_grad);
+#endif

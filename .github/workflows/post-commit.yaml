@@ -58,7 +58,6 @@ jobs:
           CUDA_PATH="$(pwd | xargs dirname)/cuda"
           LD_LIBRARY_PATH="${CUDA_PATH}/lib64"
           export CUDA_PATH LD_LIBRARY_PATH
-          export MAX_JOBS=1
           "${PDM}" sync --clean
       - name: Build Wheel
         shell: bash
@@ -66,7 +65,6 @@ jobs:
           CUDA_PATH="$(pwd | xargs dirname)/cuda"
           LD_LIBRARY_PATH="${CUDA_PATH}/lib64"
           export CUDA_PATH LD_LIBRARY_PATH
-          export MAX_JOBS=1
           "${PDM}" build
       - name: Locate Wheel
         id: locate
