@@ -46,5 +46,5 @@ cuda_tag = cuda_tag.replace(".", "")
 
 
 os.system(
-    f"pip install --extra-index-url http://24.199.104.228/simple --trusted-host 24.199.104.228 torchsparse=={__version__}+{torch_tag}{cuda_tag} --force-reinstall"
+    f"pip install --extra-index-url http://24.199.104.228/simple --trusted-host 24.199.104.228 torchsparseplusplus=={__version__}+{torch_tag}{cuda_tag} --force-reinstall"
 )

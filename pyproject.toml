@@ -10,7 +10,7 @@ type = "find-links"
 
 
 [project]
-name = "torchsparse"
+name = "torchsparseplusplus"
 description = ""
 authors = []
 dependencies = ["torch==2.2.0+cu121", "tqdm", "numpy", "setuptools", "wheel", "rootpath", "attributedict", "typing-extensions"]
@@ -20,7 +20,7 @@ license = {text = "MIT"}
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = {attr = "torchsparse.__version__"}
+version = {attr = "torchsparseplusplus.__version__"}
 
 [build-system]
 requires = ["torch==2.2.0+cu121", "tqdm", "numpy", "setuptools", "rootpath"]

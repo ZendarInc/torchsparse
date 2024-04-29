@@ -4,10 +4,10 @@ import numpy as np
 import torch
 from torch import nn
 
-import torchsparse
-from torchsparse import nn as spnn
-from torchsparse.nn import functional as F
-from torchsparse.utils import make_ntuple
+import torchsparseplusplus
+from torchsparseplusplus import nn as spnn
+from torchsparseplusplus.nn import functional as F
+from torchsparseplusplus.utils import make_ntuple
 
 from .test_utils import *
 
@@ -57,7 +57,7 @@ class TestSparseConv(nn.Module):
 
     def forward(self, feats, coords):
         coords = coords.int()
-        ts_tensor = torchsparse.SparseTensor(feats, coords)
+        ts_tensor = torchsparseplusplus.SparseTensor(feats, coords)
         return self.net(ts_tensor)
 
 

@@ -13,15 +13,15 @@ from torch.utils.cpp_extension import (
     CUDAExtension,
 )
 
-# from torchsparse import __version__
+# from torchsparseplusplus import __version__
 
 from Cython.Build import cythonize
 
 cython_clean_flag = False
 
-version_file = open("./torchsparse/version.py")
+version_file = open("./torchsparseplusplus/version.py")
 version = version_file.read().split("'")[1]
-print("torchsparse version:", version)
+print("torchsparseplusplus version:", version)
 
 if (torch.cuda.is_available() and CUDA_HOME is not None) or (
     os.getenv("FORCE_CUDA", "0") == "1"
@@ -32,15 +32,15 @@ else:
     device = "cpu"
     pybind_fn = f"pybind_{device}.cpp"
 
-sources = [os.path.join("torchsparse", "backend", pybind_fn)]
-for fpath in glob.glob(os.path.join("torchsparse", "backend", "**", "*")):
+sources = [os.path.join("torchsparseplusplus", "backend", pybind_fn)]
+for fpath in glob.glob(os.path.join("torchsparseplusplus", "backend", "**", "*")):
     if (fpath.endswith("_cpu.cpp") and device in ["cpu", "cuda"]) or (
         fpath.endswith("_cuda.cu") and device == "cuda"
     ):
         sources.append(fpath)
 
 pyx_files = []
-for root, dirnames, filenames in os.walk("torchsparse"):
+for root, dirnames, filenames in os.walk("torchsparseplusplus"):
     for filename in filenames:
         file_path = os.path.join(root, filename)
         if file_path.endswith(".py"):
@@ -50,7 +50,7 @@ for root, dirnames, filenames in os.walk("torchsparse"):
             pyx_files.append(file_path2)
 
 if pyx_files == []:
-    for root, dirnames, filenames in os.walk("torchsparse"):
+    for root, dirnames, filenames in os.walk("torchsparseplusplus"):
         for filename in filenames:
             file_path = os.path.join(root, filename)
             if file_path.endswith(".pyx"):
@@ -63,13 +63,13 @@ extra_compile_args = {
 }
 
 setup(
-    name="torchsparse",
+    name="torchsparseplusplus",
     version=version,
     packages=find_packages(),
     ext_modules=cythonize(
         [
             extension_type(
-                "torchsparse.backend", sources, extra_compile_args=extra_compile_args
+                "torchsparseplusplus.backend", sources, extra_compile_args=extra_compile_args
             ),
         ]
         + pyx_files
@@ -89,7 +89,7 @@ setup(
 
 # Clean up
 if cython_clean_flag:
-    for root, dirnames, filenames in os.walk("torchsparse"):
+    for root, dirnames, filenames in os.walk("torchsparseplusplus"):
         for filename in filenames:
             file_path = os.path.join(root, filename)
             if file_path.endswith(".c"):
