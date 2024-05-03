@@ -1,5 +1,12 @@
 # TorchSparse
 
+TorchSparse is a high-performance neural network library for point cloud processing.
+
+### [website](http://torchsparse.mit.edu/) | [paper](https://arxiv.org/abs/2204.10319) | [presentation](https://www.youtube.com/watch?v=IIh4EwmcLUs) | [documents](http://torchsparse-docs.github.io/) | [pypi server](http://pypi.hanlab.ai/simple/torchsparse)
+
+
+## Introduction
+
 <p align="center">
 <img 
    src="./docs/figs/torchsparse.png"
@@ -23,15 +30,18 @@ If you need to update this code, the steps to do so are:
       for reference.)
       the version of PDM used here likely does not match that used in other
       repositories, like `RadarProcessor`
-1. increment the `torchsparse/version.py` appropriately
-1. merge those changes into `zendar-main`
+2. increment the `torchsparse/version.py` appropriately
+3. merge those changes into `zendar-main`
     1. the `post-commit` github action should then build the wheel, and make it available
        for you to download in the action summary page. unzip the file to get a
        `.whl` file, create a github release (versioned the same as the code), and
        attach the resulting wheel file to it.
-1. in the RadarProcessor repo, update the `pyproject.toml` file appropriately
-1. merge your changes into the develop branch in RadarProcessor
+4. in the RadarProcessor repo, update the `pyproject.toml` file appropriately
+5. merge your changes into the develop branch in RadarProcessor
 
+### Zendar renames this module Torchsparseplusplus
+
+To aid with integration of the new torchsparse version 2.1.0 into RadarProcessor, the module torchsparse has been renamed torchsparseplusplus. This will be maintained in the branch `zendar-main-tspp`. Torchsparse version 1.4.5 will be maintained on the branch `zendar-main`.
 
 ### [website](http://torchsparse.mit.edu/) | [paper (MICRO 2023)](https://www.dropbox.com/scl/fi/obdku0kqxjlkvuom2opk4/paper.pdf?rlkey=0zmy8eq9fzllgkx54zsvwsecf&dl=0) | [paper (MLSys 2022)](https://arxiv.org/abs/2204.10319) | [presentation](https://www.youtube.com/watch?v=IIh4EwmcLUs) | [documents](http://torchsparse-docs.github.io/) | [pypi server](http://pypi.hanlab.ai/simple/torchsparse)
 
@@ -52,7 +62,7 @@ Point cloud computation has become an increasingly more important workload for a
 
 **\[2021/6/24\]** TorchSparse v1.4 has been released.
 
-## Installation
+### Installation
 
 We provide pre-built torchsparse v2.1.0 packages (recommended) with different PyTorch and CUDA versions to simplify the building for the Linux system.
 
