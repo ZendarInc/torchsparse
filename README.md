@@ -23,7 +23,7 @@ Here at Zendar, we rely on a fork of this repo.
 ### Rolling out updates at Zendar:
 
 If you need to update this code, the steps to do so are:
-1. make the code changes required, here in `ZendarInc/torchsparseplusplus`
+1. make the code changes required, here in `ZendarInc/torchsparse`
    1. **note:** if any python dependencies were updated, ensure that you update
       the `pyproject.toml` and `pdm.lock` file correctly,
       _using the same PDM version as our CI runners_. (see `.github/workflows/post-commit.yaml`

@@ -270,7 +270,7 @@ __global__ void scatter_all_kernel_pad_sep_with_mask_float(
 //                      perform bmm if the workload size smaller than mm_thresh
 //                      and perform mm otherwise
 // conv_mode: which conv backend to use by default
-//                      0: fallback to torchsparseplusplus 1.4 conv w/o optimizations
+//                      0: fallback to torchsparse 1.4 conv w/o optimizations
 //                      1: conv with fused locality-aware gather-scatter
 //                      2: conv with all latest optimizations, including
 //                         fused gather-scatter and matmul grouping. Kernel
