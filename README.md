@@ -30,7 +30,7 @@ If you need to update this code, the steps to do so are:
       for reference.)
       the version of PDM used here likely does not match that used in other
       repositories, like `RadarProcessor`
-2. increment the `torchsparseplusplus/version.py` appropriately
+2. increment the `torchsparse/version.py` appropriately
 3. merge those changes into `zendar-main`
     1. the `post-commit` github action should then build the wheel, and make it available
        for you to download in the action summary page. unzip the file to get a
@@ -41,8 +41,7 @@ If you need to update this code, the steps to do so are:
 
 ### Zendar renames this module Torchsparseplusplus
 
-To aid with integration of the new torchsparse version 2.1.0 into RadarProcessor, the module torchsparse has been renamed torchsparseplusplus.
-
+To aid with integration of the new torchsparse version 2.1.0 into RadarProcessor, the module torchsparse has been renamed torchsparseplusplus. This will be maintained in the branch `zendar-main-tspp`.
 
 ### [website](http://torchsparse.mit.edu/) | [paper (MICRO 2023)](https://www.dropbox.com/scl/fi/obdku0kqxjlkvuom2opk4/paper.pdf?rlkey=0zmy8eq9fzllgkx54zsvwsecf&dl=0) | [paper (MLSys 2022)](https://arxiv.org/abs/2204.10319) | [presentation](https://www.youtube.com/watch?v=IIh4EwmcLUs) | [documents](http://torchsparse-docs.github.io/) | [pypi server](http://pypi.hanlab.ai/simple/torchsparse)
 
