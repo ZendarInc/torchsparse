@@ -80,7 +80,7 @@ jobs:
           | xargs printf "name=%s\n" \
           >> "${GITHUB_OUTPUT}"
       - name: Archive Wheel
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.locate.outputs.name }}
           path: ${{ steps.locate.outputs.wheel }}
