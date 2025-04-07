@@ -25,7 +25,7 @@ jobs:
         run: |
           pushd ..
           INSTALLER=cuda_12.6.3_560.35.05_linux.run
-          VERSION=12.1.1
+          VERSION=12.6.3
           BASE=https://developer.download.nvidia.com/compute/cuda
           SHASUM=d74022d41d80105319dfa21beea39b77a5b9919539c0487a05caaf2446d6a70e
 
