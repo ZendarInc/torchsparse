@@ -19,7 +19,7 @@ jobs:
       PDM_DIR: __pdm
       PDM: __pdm/bin/pdm
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install CUDA 12.6.3
         shell: bash
         run: |
