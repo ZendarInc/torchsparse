@@ -1,8 +1,9 @@
 name: Torchsparse Post-Commit
 on:
-  push:
-    branches:
-      - zendar-main
+  pull_request: # Doing temporarily to get wheels
+  # push:
+    # branches:
+    #   - zendar-main
   workflow_dispatch:
   workflow_call:
 jobs:
@@ -19,11 +20,11 @@ jobs:
       PDM: __pdm/bin/pdm
     steps:
       - uses: actions/checkout@v3
-      - name: Install CUDA 12.1.1
+      - name: Install CUDA 12.6.3
         shell: bash
         run: |
           pushd ..
-          INSTALLER=cuda_12.1.1_530.30.02_linux.run
+          INSTALLER=cuda_12.6.3_560.35.05_linux.run
           VERSION=12.1.1
           BASE=https://developer.download.nvidia.com/compute/cuda
           SHASUM=d74022d41d80105319dfa21beea39b77a5b9919539c0487a05caaf2446d6a70e
