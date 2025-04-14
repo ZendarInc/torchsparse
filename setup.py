@@ -11,11 +11,9 @@ from torch.utils.cpp_extension import (
     CUDAExtension,
 )
 
-# from torchsparseplusplus import __version__
+from torchsparseplusplus import __version__
 
-version_file = open("./torchsparseplusplus/version.py")
-version = version_file.read().split("'")[1]
-print("torchsparseplusplus version:", version)
+version = __version__
 
 if (torch.cuda.is_available() and CUDA_HOME is not None) or (
     os.getenv("FORCE_CUDA", "0") == "1"
