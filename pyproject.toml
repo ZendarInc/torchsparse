@@ -13,7 +13,15 @@ type = "find-links"
 name = "torchsparse"
 description = ""
 authors = []
-dependencies = ["torch==2.6.0+cu126", "tqdm", "numpy", "setuptools"]
+dependencies = [
+    "torch==2.6.0+cu126",
+    "tqdm",
+    "numpy",
+    "setuptools",
+    "twine==6.1.0",
+    "keyring>=25.6.0",
+    "keyrings-google-artifactregistry-auth>=1.1.2",
+]
 requires-python = ">=3.11,<3.12"
 readme = "README.md"
 license = {text = "MIT"}
@@ -23,4 +31,4 @@ dynamic = ["version"]
 version = {attr = "torchsparse.__version__"}
 
 [build-system]
-requires = ["torch==2.6.0+cu126", "tqdm", "numpy", "setuptools"]
+requires = ["torch==2.6.0+cu126", "tqdm", "numpy", "setuptools", "twine==6.1.0"]
