@@ -22,7 +22,6 @@ dependencies = [
     "rootpath",
     "attributedict",
     "typing-extensions",
-    "pytest>=8.3.5",
 ]
 requires-python = ">=3.11,<3.12"
 readme = "README.md"
