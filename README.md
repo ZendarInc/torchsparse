@@ -114,10 +114,10 @@ Tag a new release and upload the built wheels under the release assets.
 
 ## 📦 Integrating with RadarProcessor
 
-To use the new TorchSparse wheels in `RadarProcessor`, simply add the wheel URL to its dependencies. If you're using [`uv`](https://github.com/astral-sh/uv):
+We recently switched to a package registry hosted in GCP, so to upload your package to the registry, make sure you are signed in with `gcloud auth application-default login` and then use twine to upload your new release.
 
-```bash
-uv add <wheel-url>
+```
+/tmp/bin/pdm twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ dist/*
 ```
 
 That’s it! 🎉
