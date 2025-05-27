@@ -130,6 +130,12 @@ requires_python = ">=3.6"
 summary = "Internationalized Domain Names in Applications (IDNA)"
 
 [[package]]
+name = "iniconfig"
+version = "2.1.0"
+requires_python = ">=3.8"
+summary = "brain-dead simple config-ini parsing"
+
+[[package]]
 name = "inspecta"
 version = "0.1.3"
 summary = "A colorized object pretty printer - for Python."
@@ -314,6 +320,18 @@ requires_python = ">=3.8"
 summary = "A python implementation of GNU readline."
 
 [[package]]
+name = "pytest"
+version = "8.3.5"
+requires_python = ">=3.8"
+summary = "pytest: simple powerful testing with Python"
+dependencies = [
+    "colorama; sys_platform == \"win32\"",
+    "iniconfig",
+    "packaging",
+    "pluggy<2,>=1.5",
+]
+
+[[package]]
 name = "requests"
 version = "2.32.3"
 requires_python = ">=3.8"
@@ -459,7 +477,7 @@ summary = "A built-package format for Python"
 [metadata]
 lock_version = "4.2"
 groups = ["default"]
-content_hash = "sha256:3b4394515baac264e8d4d08b18d4efbc00a8ad2996e9f64d0b3b1c0a3701863d"
+content_hash = "sha256:daa37ad1e79e5023b0a19ef190b0580b8e4e036c26235a116202e4d7f9c02484"
 
 [metadata.files]
 "attributedict 0.3.0" = [
@@ -682,6 +700,10 @@ content_hash = "sha256:3b4394515baac264e8d4d08b18d4efbc00a8ad2996e9f64d0b3b1c0a3
 "idna 3.10" = [
     {url = "https://files.pythonhosted.org/packages/76/c6/c88e154df9c4e1a2a66ccf0005a88dfb2650c1dffb6f5ce603dfbd452ce3/idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"},
     {url = "https://files.pythonhosted.org/packages/f1/70/7703c29685631f5a7590aa73f1f1d3fa9a380e654b86af429e0934a32f7d/idna-3.10.tar.gz", hash = "sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9"},
+]
+"iniconfig 2.1.0" = [
+    {url = "https://files.pythonhosted.org/packages/2c/e1/e6716421ea10d38022b952c159d5161ca1193197fb744506875fbb87ea7b/iniconfig-2.1.0-py3-none-any.whl", hash = "sha256:9deba5723312380e77435581c6bf4935c94cbfab9b1ed33ef8d238ea168eb760"},
+    {url = "https://files.pythonhosted.org/packages/f2/97/ebf4da567aa6827c909642694d71c9fcf53e5b504f2d96afea02718862f3/iniconfig-2.1.0.tar.gz", hash = "sha256:3abbd2e30b36733fee78f9c7f7308f2d0050e88f0087fd25c2645f63c773e1c7"},
 ]
 "inspecta 0.1.3" = [
     {url = "https://files.pythonhosted.org/packages/03/aa/5ad8e223fa564d474b465771710b8b7b23896b59651cf115f510bcfda3ee/inspecta-0.1.3-py3-none-any.whl", hash = "sha256:043b4dc3e6b7727e706e793befcba9981eb00f2b1c012c49f6d9cdcb2c18b15f"},
@@ -943,6 +965,10 @@ content_hash = "sha256:3b4394515baac264e8d4d08b18d4efbc00a8ad2996e9f64d0b3b1c0a3
 "pyreadline3 3.5.4" = [
     {url = "https://files.pythonhosted.org/packages/0f/49/4cea918a08f02817aabae639e3d0ac046fef9f9180518a3ad394e22da148/pyreadline3-3.5.4.tar.gz", hash = "sha256:8d57d53039a1c75adba8e50dd3d992b28143480816187ea5efbd5c78e6c885b7"},
     {url = "https://files.pythonhosted.org/packages/5a/dc/491b7661614ab97483abf2056be1deee4dc2490ecbf7bff9ab5cdbac86e1/pyreadline3-3.5.4-py3-none-any.whl", hash = "sha256:eaf8e6cc3c49bcccf145fc6067ba8643d1df34d604a1ec0eccbf7a18e6d3fae6"},
+]
+"pytest 8.3.5" = [
+    {url = "https://files.pythonhosted.org/packages/30/3d/64ad57c803f1fa1e963a7946b6e0fea4a70df53c1a7fed304586539c2bac/pytest-8.3.5-py3-none-any.whl", hash = "sha256:c69214aa47deac29fad6c2a4f590b9c4a9fdb16a403176fe154b79c0b4d4d820"},
+    {url = "https://files.pythonhosted.org/packages/ae/3c/c9d525a414d506893f0cd8a8d0de7706446213181570cdbd766691164e40/pytest-8.3.5.tar.gz", hash = "sha256:f4efe70cc14e511565ac476b57c279e12a855b11f48f212af1080ef2263d3845"},
 ]
 "requests 2.32.3" = [
     {url = "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
