@@ -107,14 +107,9 @@ Build the new wheels:
 
 ```bash
 /tmp/bin/pdm build
-```
 
-- If your build process gets killed mysteriously check for `oom` messages in syslog.  You can limit build parallelism with:
-
-```bash
+# if build dies due to out of memory (oom), limit parallelism with:
 export MAX_JOBS=4
-# re-run
-/tmp/bin/pdm build
 ```
 
 ______________________________________________________________________
@@ -132,12 +127,12 @@ Tag a new release and upload the built wheels under the release assets.
 
 ______________________________________________________________________
 
-## 📦 Integrating with RadarProcessor
+## 9. Upload to GCP Artifact Repository
 
-To use the new TorchSparse wheels in `RadarProcessor`, simply add the wheel URL to its dependencies. If you're using [`uv`](https://github.com/astral-sh/uv):
+We recently switched to a package registry hosted in GCP, so to upload your package to the registry, make sure you are signed in with `gcloud auth application-default login` and then use twine to upload your new release.
 
 ```bash
-uv add <wheel-url>
+TWINE_PASSWORD=$(gcloud auth print-access-token)  /tmp/bin/pdm run twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ —username oauth2accesstoken dist/*
 ```
 
 That’s it! 🎉
