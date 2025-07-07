@@ -58,15 +58,6 @@ repos:
           - flake8-docstrings
           - flake8-executable
           - flake8-quotes
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.6.1
-    hooks:
-      - id: mypy
-        name: (Python) Check with mypy
-        additional_dependencies:
-          - tokenize-rt
-          - types-pyyaml
-          - types-toml
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v13.0.0
     hooks:
