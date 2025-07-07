@@ -109,6 +109,14 @@ Build the new wheels:
 /tmp/bin/pdm build
 ```
 
+- If your build process gets killed mysteriously check for `oom` messages in syslog.  You can limit build parallelism with:
+
+```bash
+export MAX_JOBS=4
+# re-run
+/tmp/bin/pdm build
+```
+
 ______________________________________________________________________
 
 ### 7. Submit Changes
