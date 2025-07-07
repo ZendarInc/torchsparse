@@ -27,7 +27,8 @@ extra_compile_args = {
     'nvcc': [
         '-O3', '-gencode=arch=compute_80,code=sm_80',
         '-gencode=arch=compute_86,code=sm_86',
-        '-gencode=arch=compute_89,code=sm_89'
+        '-gencode=arch=compute_89,code=sm_89',
+        '-gencode=arch=compute_120,code=sm_120'
     ],
 }
 

@@ -95,6 +95,9 @@ Build the new wheels:
 
 ```bash
 /tmp/bin/pdm build
+
+# if build dies due to out of memory (oom), limit parallelism with:
+export MAX_JOBS=4
 ```
 
 ---
@@ -112,12 +115,12 @@ Tag a new release and upload the built wheels under the release assets.
 
 ---
 
-## 📦 Integrating with RadarProcessor
+## 9. Upload to GCP Artifact Repository
 
 We recently switched to a package registry hosted in GCP, so to upload your package to the registry, make sure you are signed in with `gcloud auth application-default login` and then use twine to upload your new release.
 
-```
-/tmp/bin/pdm twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ dist/*
+```bash
+TWINE_PASSWORD=$(gcloud auth print-access-token)  /tmp/bin/pdm run twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ —username oauth2accesstoken dist/*
 ```
 
 That’s it! 🎉

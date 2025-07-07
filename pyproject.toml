@@ -3,9 +3,9 @@
 # inconsistencies.
 
 [[tool.pdm.source]]
-url = "https://download.pytorch.org/whl/cu126"
+url = "https://download.pytorch.org/whl/cu128"
 verify_ssl = true
-name = "torch-cu126"
+name = "torch-cu128"
 type = "find-links"
 
 
@@ -14,7 +14,7 @@ name = "torchsparse"
 description = ""
 authors = []
 dependencies = [
-    "torch==2.6.0+cu126",
+    "torch==2.7.0+cu128",
     "tqdm",
     "numpy",
     "setuptools",
@@ -28,4 +28,9 @@ dynamic = ["version"]
 version = {attr = "torchsparse.__version__"}
 
 [build-system]
-requires = ["torch==2.6.0+cu126", "tqdm", "numpy", "setuptools"]
+requires = [
+    "torch==2.7.0+cu128",
+    "tqdm",
+    "numpy",
+    "setuptools"
+]
