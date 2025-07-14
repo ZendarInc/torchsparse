@@ -14,7 +14,7 @@ name = "torchsparseplusplus"
 description = ""
 authors = []
 dependencies = [
-    "torch==2.7.0+cu128",
+    "torch==2.7.1+cu128",
     "tqdm",
     "numpy",
     "setuptools",
@@ -33,11 +33,12 @@ version = {attr = "torchsparseplusplus.__version__"}
 
 [build-system]
 requires = [
-    "torch==2.7.0+cu128",
+    "torch==2.7.1+cu128",
     "tqdm", "numpy",
     "setuptools",
     "wheel",
     "rootpath",
     "attributedict",
-    "typing-extensions"
+    "typing-extensions",
+    "twine"
 ]
