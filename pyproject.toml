@@ -39,5 +39,6 @@ requires = [
     "wheel",
     "rootpath",
     "attributedict",
-    "typing-extensions"
+    "typing-extensions",
+    "twine"
 ]
