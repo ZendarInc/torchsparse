@@ -120,7 +120,14 @@ Tag a new release and upload the built wheels under the release assets.
 We recently switched to a package registry hosted in GCP, so to upload your package to the registry, make sure you are signed in with `gcloud auth application-default login` and then use twine to upload your new release.
 
 ```bash
-TWINE_PASSWORD=$(gcloud auth print-access-token)  /tmp/bin/pdm run twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ —username oauth2accesstoken dist/*
+TWINE_PASSWORD=$(gcloud auth print-access-token)  /tmp/bin/pdm run twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ --username oauth2accesstoken dist/*
+
+# if above fails with "twine: no such command" try running in the venv and "pip install" it
+source /tmp/venv/bin/activate
+which twine # if not installed...
+pip install twine
+# run above command, then don't forget:
+deactivate
 ```
 
 That’s it! 🎉
