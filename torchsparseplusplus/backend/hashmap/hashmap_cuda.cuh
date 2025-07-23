@@ -59,7 +59,7 @@ __device__ int hash_murmur3(key_type key, int _capacity){
   k ^= k >> 13;
   k *= 0xc2b2ae35;
   k ^= k >> 16;
-  return k % _capacity;
+  return (_capacity + k % _capacity) % _capacity; // ensure non-negative
 }
 
 template <typename key_type, typename val_type>
