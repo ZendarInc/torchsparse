@@ -428,6 +428,8 @@ at::Tensor conv_forward_gather_scatter_cuda_latest(
   bool is_half = in_feat.scalar_type() == at::ScalarType::Half;
   at::Tensor out_feat = torch::zeros({output_size, _kernel.size(-1)}, options);
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   // pad num channels to an even number
   at::Tensor kernel = _kernel.clone();
 
@@ -551,7 +553,8 @@ at::Tensor conv_forward_gather_scatter_cuda_latest(
         gather_all_kernel_pad_sep_with_mask<scalar_t>
             <<<ceil((double)(n_in_feats * n_in_channels) /
                     (256 << (sizeof(scalar_t) == 2) + 2)),
-               256>>>(n_in_feats, n_in_channels, kernel_volume,
+               256, 0, stream>>>(
+                      n_in_feats,n_in_channels, kernel_volume,
                       in_feat.data_ptr<scalar_t>(),
                       in_buffer.data_ptr<scalar_t>(),
                       neighbor_map.data_ptr<int>(),
@@ -649,7 +652,7 @@ at::Tensor conv_forward_gather_scatter_cuda_latest(
   if (is_half) {
     // new version
     scatter_all_kernel_pad_sep_with_mask_half<<<
-        ceil((double)(n_out_feats * n_out_channels) / 2048), 256>>>(
+        ceil((double)(n_out_feats * n_out_channels) / 2048), 256, 0, stream>>>(
         n_out_feats, n_out_channels, kernel_volume,
         reinterpret_cast<half *>(out_buffer.data_ptr<at::Half>()),
         reinterpret_cast<half *>(out_feat.data_ptr<at::Half>()),
@@ -660,7 +663,7 @@ at::Tensor conv_forward_gather_scatter_cuda_latest(
   } else {
     // new version
     scatter_all_kernel_pad_sep_with_mask_float<<<
-        ceil((double)(n_out_feats * n_out_channels) / 1024), 256>>>(
+        ceil((double)(n_out_feats * n_out_channels) / 1024), 256, 0, stream>>>(
         n_out_feats, n_out_channels, kernel_volume,
         out_buffer.data_ptr<float>(), out_feat.data_ptr<float>(),
         neighbor_map.data_ptr<int>(), neighbor_offset_gpu.data_ptr<int>(),
@@ -689,6 +692,7 @@ at::Tensor conv_forward_gather_scatter_cuda_fallback(
   auto options =
       torch::TensorOptions().dtype(in_feat.dtype()).device(in_feat.device());
   at::Tensor out_feat = torch::zeros({output_size, kernel.size(-1)}, options);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
 
   // need to avoid misaligned memory access
   bool padded = false;
@@ -781,7 +785,7 @@ at::Tensor conv_forward_gather_scatter_cuda_fallback(
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(
         in_feat.scalar_type(), "conv_forward_gather_scatter_cuda", ([&] {
           gather_kernel<scalar_t>
-              <<<ceil((double)(n_active_feats * n_in_channels) / 256), 256>>>(
+              <<<ceil((double)(n_active_feats * n_in_channels) / 256), 256, 0, stream>>>(
                   n_active_feats, n_in_feats, n_in_channels,
                   in_feat.data_ptr<scalar_t>(),
                   in_buffer_activated.data_ptr<scalar_t>(),
@@ -798,7 +802,7 @@ at::Tensor conv_forward_gather_scatter_cuda_fallback(
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(
         in_feat.scalar_type(), "conv_forward_gather_scatter_cuda", ([&] {
           scatter_kernel<scalar_t>
-              <<<ceil((double)(n_active_feats * n_out_channels) / 256), 256>>>(
+              <<<ceil((double)(n_active_feats * n_out_channels) / 256), 256, 0, stream>>>(
                   n_active_feats, n_out_feats, n_out_channels,
                   out_buffer_activated.data_ptr<scalar_t>(),
                   out_feat.data_ptr<scalar_t>(),
@@ -839,6 +843,7 @@ void conv_backward_gather_scatter_cuda(at::Tensor in_feat, at::Tensor grad_in_fe
       torch::zeros({in_buffer_size, in_feat.size(1)}, options);
   auto out_grad_buffer =
       torch::zeros({in_buffer_size, kernel.size(2)}, options);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
   int cur_offset = 0;
   for (int i = 0; i < kernel_volume; i++) {
     auto kernel_grad_buffer = grad_kernel[i];
@@ -879,7 +884,7 @@ void conv_backward_gather_scatter_cuda(at::Tensor in_feat, at::Tensor grad_in_fe
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(
         in_feat.scalar_type(), "conv_forward_gather_scatter_cuda", ([&] {
           gather_kernel<scalar_t>
-              <<<ceil((double)(n_active_feats * n_out_channels) / 256), 256>>>(
+              <<<ceil((double)(n_active_feats * n_out_channels) / 256), 256, 0, stream>>>(
                   n_active_feats, n_out_feats, n_out_channels,
                   grad_out_feat.data_ptr<scalar_t>(),
                   out_grad_buffer_activated.data_ptr<scalar_t>(),
@@ -888,7 +893,7 @@ void conv_backward_gather_scatter_cuda(at::Tensor in_feat, at::Tensor grad_in_fe
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(
         in_feat.scalar_type(), "conv_forward_gather_scatter_cuda", ([&] {
           gather_kernel<scalar_t>
-              <<<ceil((double)(n_active_feats * n_in_channels) / 256), 256>>>(
+              <<<ceil((double)(n_active_feats * n_in_channels) / 256), 256, 0, stream>>>(
                   n_active_feats, n_in_feats, n_in_channels,
                   in_feat.data_ptr<scalar_t>(),
                   in_buffer_activated.data_ptr<scalar_t>(),
@@ -904,7 +909,7 @@ void conv_backward_gather_scatter_cuda(at::Tensor in_feat, at::Tensor grad_in_fe
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(
         in_feat.scalar_type(), "conv_forward_gather_scatter_cuda", ([&] {
           scatter_kernel<scalar_t>
-              <<<ceil((double)(n_active_feats * n_in_channels) / 256), 256>>>(
+              <<<ceil((double)(n_active_feats * n_in_channels) / 256), 256, 0, stream>>>(
                   n_active_feats, n_in_feats, n_in_channels,
                   in_grad_buffer_activated.data_ptr<scalar_t>(),
                   grad_in_feat.data_ptr<scalar_t>(),

@@ -1,4 +1,5 @@
 #include <torch/torch.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <cmath>
 #include <iostream>
@@ -49,7 +50,10 @@ at::Tensor hash_query_cuda(const at::Tensor hash_query,
 
 void convert_transposed_out_in_map(const at::Tensor out_in_map,
                             at::Tensor out_in_map_t) {
-  convert_out_in_map_kernel<<<(out_in_map.size(0) * out_in_map.size(1) + 255) / 256, 256>>>(
+
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
+  convert_out_in_map_kernel<<<(out_in_map.size(0) * out_in_map.size(1) + 255) / 256, 256, 0, stream>>>(
     out_in_map.data_ptr<int>(), out_in_map_t.data_ptr<int>(), out_in_map.size(0), out_in_map.size(1));
 }
 
@@ -57,9 +61,12 @@ void convert_transposed_out_in_map(const at::Tensor out_in_map,
 
 
 at::Tensor derive_bitmask_from_out_in_map(const at::Tensor out_in_map, const int split_mask_num, int valid_n) {
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   at::Tensor bitmask = torch::full(
       {split_mask_num, out_in_map.size(0)}, -1, at::device(out_in_map.device()).dtype(at::ScalarType::Int));
-  derive_bit_mask_from_out_in_map_kernel<<<(split_mask_num * out_in_map.size(0) + 255) / 256, 256>>>(
+
+  derive_bit_mask_from_out_in_map_kernel<<<(split_mask_num * out_in_map.size(0) + 255) / 256, 256, 0, stream>>>(
     out_in_map.data_ptr<int>(), bitmask.data_ptr<int>(), valid_n, out_in_map.size(0), out_in_map.size(1), split_mask_num);
   return bitmask;
 }

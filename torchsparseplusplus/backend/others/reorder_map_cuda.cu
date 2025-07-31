@@ -1,5 +1,6 @@
 #include <torch/extension.h>
 #include "reorder_map_cuda.h"
+#include <ATen/cuda/CUDAContext.h>
 
 #define cta_M 128
 #define thd_num 128 // 1 thd per row
@@ -36,12 +37,13 @@ at::Tensor reorder_out_in_map_cuda(
       torch::TensorOptions().dtype(_out_in_map.dtype()).device(_out_in_map.device());
     at::Tensor _reorder_out_in_map = torch::empty({M, kernel_volume}, options);
 
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
 
     auto out_in_map = _out_in_map.data_ptr<int>();
     auto reorder_loc = _reorder_loc.data_ptr<int>();
     auto reorder_out_in_map = _reorder_out_in_map.data_ptr<int>();
 
-    reorder_out_in_map_kernel<<<(M + cta_M - 1) / cta_M * kernel_volume, cta_M>>>(
+    reorder_out_in_map_kernel<<<(M + cta_M - 1) / cta_M * kernel_volume, cta_M, 0, stream>>>(
         out_in_map, reorder_loc, M, kernel_volume, split_mask_len, reorder_out_in_map);
     
     return _reorder_out_in_map;

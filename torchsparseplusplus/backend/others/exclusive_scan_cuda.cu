@@ -1,5 +1,6 @@
 #include <torch/torch.h>
 #include <torch/extension.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include "exclusive_scan_cuda.h"
 
@@ -32,11 +33,12 @@ at::Tensor exclusive_scan_quantified_wrapper(
     const int k_vol, at::Tensor neighbor_offset, 
     at::Tensor neighbor_address, at::Tensor q_neighbor_address){
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
   int *knnz_ptr = neighbor_offset.data_ptr<int>();
   int *kpos_ptr = neighbor_address.data_ptr<int>();
   int *qkpos_ptr = q_neighbor_address.data_ptr<int>();
 
-  exclusive_scan_for_kernel_quantified<<<1, k_vol, 0, 0>>>(
+  exclusive_scan_for_kernel_quantified<<<1, k_vol, 0, stream>>>(
         k_vol + 1, knnz_ptr, 128, kpos_ptr, qkpos_ptr
   );
   // We must have a tensor as return val for Pybind.

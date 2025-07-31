@@ -1,4 +1,5 @@
 #include <torch/extension.h>
+#include <ATen/cuda/CUDAContext.h>
 #include "convolution_forward_implicit_gemm_sorted_cuda.h"
 #include "../utils/memory.cuh"
 #include <cuda_fp16.h>
@@ -1780,6 +1781,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
   auto out_in_map = _out_in_map.data_ptr<int>();
   auto reorder_loc = _reorder_loc.data_ptr<int>();
   bool is_half = _in_feats.scalar_type() == at::ScalarType::Half;
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
 
   if (is_half)
   {
@@ -1799,7 +1801,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       // threadIdx.x: 32
       // threadIdx.y: i_factors[2] * j_factors[2]
       dim3 threads_per_block(32, 4);
-      conv_forward_cuda_setting3_mode1_f16f16f32<<<num_blocks, threads_per_block>>>(
+      conv_forward_cuda_setting3_mode1_f16f16f32<<<num_blocks, threads_per_block, 0, stream>>>(
         num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
     }
     else if (num_in_channels % 32 == 0 && num_out_channels % 16 == 0)
@@ -1809,7 +1811,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       // threadIdx.x: 32
       // threadIdx.y: i_factors[2] * j_factors[2]
       dim3 threads_per_block(32, 2);
-      conv_forward_cuda_setting2_mode1_f16f16f32<<<num_blocks, threads_per_block>>>(
+      conv_forward_cuda_setting2_mode1_f16f16f32<<<num_blocks, threads_per_block, 0, stream>>>(
         num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
     }
     else
@@ -1820,33 +1822,33 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       // threadIdx.x: 32
       // threadIdx.y: i_factors[2] * j_factors[2]
       dim3 threads_per_block(32, 2);
-      // conv_forward_cuda_setting1_mode1_f16f16f32<<<num_blocks, threads_per_block>>>(
+      // conv_forward_cuda_setting1_mode1_f16f16f32<<<num_blocks, threads_per_block, 0, stream>>>(
       //     _out_feats.size(0), num_in_channels, num_out_channels, kernel_volume, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
       if (num_in_channels % 16 == 0)
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, false, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, false, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 8 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 8, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 8, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 4, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 4, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 2, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 2, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -1854,27 +1856,27 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 8 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<16, 2, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<16, 2, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -1882,27 +1884,27 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<8, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<8, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 8 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<8, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<8, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<8, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<8, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<8, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<8, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<8, 2, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<8, 2, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -1910,27 +1912,27 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<4, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<4, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 8 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<4, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<4, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<4, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<4, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<4, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<4, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<4, 2, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<4, 2, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -1938,27 +1940,27 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<2, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<2, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 8 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<2, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<2, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<2, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<2, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<2, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<2, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f16f16f32<2, 2, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f16f16f32<2, 2, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -1978,7 +1980,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       // threadIdx.x: 32
       // threadIdx.y: i_factors[2] * j_factors[2]
       dim3 threads_per_block(32, 4);
-      conv_forward_cuda_setting3_mode1_tf32tf32f32<<<num_blocks, threads_per_block>>>(
+      conv_forward_cuda_setting3_mode1_tf32tf32f32<<<num_blocks, threads_per_block, 0, stream>>>(
         num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
     }
     else if (num_in_channels % 32 == 0 && num_out_channels % 16 == 0)
@@ -1988,7 +1990,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       // threadIdx.x: 32
       // threadIdx.y: i_factors[2] * j_factors[2]
       dim3 threads_per_block(32, 2);
-      conv_forward_cuda_setting2_mode1_tf32tf32f32<<<num_blocks, threads_per_block>>>(
+      conv_forward_cuda_setting2_mode1_tf32tf32f32<<<num_blocks, threads_per_block, 0, stream>>>(
         num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
     }
     else
@@ -1999,28 +2001,28 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       // threadIdx.x: 32
       // threadIdx.y: i_factors[2] * j_factors[2]
       dim3 threads_per_block(32, 2);
-      // conv_forward_cuda_setting1_mode1_tf32tf32f32<<<num_blocks, threads_per_block>>>(
+      // conv_forward_cuda_setting1_mode1_tf32tf32f32<<<num_blocks, threads_per_block, 0, stream>>>(
       //     _out_feats.size(0), num_in_channels, num_out_channels, kernel_volume, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
       if (num_in_channels % 16 == 0)
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, false, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, false, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 8, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 8, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 4, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 4, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2028,22 +2030,22 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<16, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2051,22 +2053,22 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<8, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2074,22 +2076,22 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_tf32tf32f32<4, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, _reduced_mask.size(1), _reorder_loc.size(1), in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2108,7 +2110,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       int block_num_N = num_out_channels / 64;  //j_factors1
       dim3 num_blocks(block_num_M * block_num_N * split_mask_num); 
       dim3 threads_per_block(128);
-      conv_forward_cuda_setting3_mode1_f32f32f32<<<num_blocks, threads_per_block>>>(
+      conv_forward_cuda_setting3_mode1_f32f32f32<<<num_blocks, threads_per_block, 0, stream>>>(
           num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
     }
     else if (num_in_channels % 32 == 0 && num_out_channels % 16 == 0)
@@ -2117,7 +2119,7 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       int block_num_N = num_out_channels / 16;  //j_factors1
       dim3 num_blocks(block_num_M * block_num_N * split_mask_num); 
       dim3 threads_per_block(64);
-      conv_forward_cuda_setting2_mode1_f32f32f32<<<num_blocks, threads_per_block>>>(
+      conv_forward_cuda_setting2_mode1_f32f32f32<<<num_blocks, threads_per_block, 0, stream>>>(
           num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
     }
     else
@@ -2126,29 +2128,29 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       int block_num_N = (num_out_channels + 15) / 16;  //j_factors1
       dim3 num_blocks(block_num_M * block_num_N * split_mask_num); 
       dim3 threads_per_block(64);
-      // conv_forward_cuda_setting1_mode1_tf32tf32f32<<<num_blocks, threads_per_block>>>(
+      // conv_forward_cuda_setting1_mode1_tf32tf32f32<<<num_blocks, threads_per_block, 0, stream>>>(
       //     num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
       
       if (num_in_channels % 16 == 0)
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, false, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, false, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 8, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 8, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 4, false, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 4, false, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2156,22 +2158,22 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<16, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<16, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2179,22 +2181,22 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<8, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<8, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<8, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<8, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<8, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<8, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<8, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<8, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }
@@ -2202,22 +2204,22 @@ at::Tensor conv_forward_implicit_gemm_sorted_cuda(
       {
         if (num_out_channels % 16 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<4, 16, true, false><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<4, 16, true, false><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 4 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<4, 16, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<4, 16, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else if (num_out_channels % 2 == 0)
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<4, 8, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<4, 8, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
         else
         {
-          conv_forward_cuda_setting1_mode1_f32f32f32<4, 4, true, true><<<num_blocks, threads_per_block>>>(
+          conv_forward_cuda_setting1_mode1_f32f32f32<4, 4, true, true><<<num_blocks, threads_per_block, 0, stream>>>(
               num_out_feats, num_in_channels, num_out_channels, kernel_volume, split_mask_len, reduced_mask_len, reorder_loc_len, in_feats, kernel, reduced_mask, out_in_map, reorder_loc, out_feats);
         }
       }

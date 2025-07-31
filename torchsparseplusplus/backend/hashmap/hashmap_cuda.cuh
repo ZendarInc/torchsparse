@@ -8,6 +8,7 @@
 #include <utility>
 #include "cuda_runtime.h"
 #include <torch/extension.h>
+#include <ATen/cuda/CUDAContext.h>
 
 /** Reserved value for indicating "empty". */
 #define EMPTY_CELL (0)
@@ -255,12 +256,14 @@ __global__ void lookup_coords_kernel(
 
 template <typename key_type, typename val_type>
 void GPUHashTable<key_type, val_type>::insert_many(const key_type *keys, const int n){
-  insert_kernel<key_type, val_type><<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(table_keys, table_vals, keys, n, _capacity);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+  insert_kernel<key_type, val_type><<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(table_keys, table_vals, keys, n, _capacity);
 }
 
 template <typename key_type, typename val_type>
 void GPUHashTable<key_type, val_type>::insert_many_coords(int *coords, const int n){
-  insert_coords_kernel<key_type, val_type><<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(table_keys, table_vals, coords, n, _capacity);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+  insert_coords_kernel<key_type, val_type><<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(table_keys, table_vals, coords, n, _capacity);
 }
 
 template <typename key_type, typename val_type>
@@ -276,7 +279,8 @@ void GPUHashTable<key_type, val_type>::insert_coords(at::Tensor coords){
 
 template <typename key_type, typename val_type>
 void GPUHashTable<key_type, val_type>::lookup_many(const key_type *keys, val_type *results, const int n){
-  lookup_kernel<key_type, val_type><<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(table_keys, table_vals, keys, results, n, _capacity);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+  lookup_kernel<key_type, val_type><<<(n + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(table_keys, table_vals, keys, results, n, _capacity);
 }
 
 template <typename key_type, typename val_type>
@@ -284,12 +288,15 @@ void GPUHashTable<key_type, val_type>::lookup_many_coords(
   int *coords, val_type *results, 
   const int* kernel_sizes, const int* strides,
   const int n, const int kernel_volume){
+
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   if (kernel_volume % 2)
-    lookup_coords_kernel<key_type, val_type, true><<<(n * kernel_volume + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
+    lookup_coords_kernel<key_type, val_type, true><<<(n * kernel_volume + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(
       table_keys, table_vals, coords, results, kernel_sizes, strides,
       n, _capacity, kernel_volume);
   else
-    lookup_coords_kernel<key_type, val_type, false><<<(n * kernel_volume + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
+    lookup_coords_kernel<key_type, val_type, false><<<(n * kernel_volume + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(
       table_keys, table_vals, coords, results, kernel_sizes, strides,
       n, _capacity, kernel_volume);
 }

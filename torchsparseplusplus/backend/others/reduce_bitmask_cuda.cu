@@ -1,5 +1,6 @@
 #include <torch/extension.h>
 #include "reduce_bitmask_cuda.h"
+#include <ATen/cuda/CUDAContext.h>
 
 
 // 1 block -- 4 warps -- 128 threads
@@ -74,10 +75,12 @@ torch::Tensor reduce_bitmask_cuda(
     auto bitmask_int = _bitmask_int.data_ptr<int>();
     auto reduced_bitmask_int = _reduced_bitmask_int.data_ptr<int>();
 
+    cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
     dim3 num_blocks(((reduced_row_num - 1) / output_per_blk + 1), split_mask_num); 
     dim3 num_threads(thd_per_blk);
 
-    reduce_mask_cuda_int32<<<num_blocks, num_threads>>>(
+    reduce_mask_cuda_int32<<<num_blocks, num_threads, 0, stream>>>(
         bitmask_int, output_node_num, reduced_row_num, M_tile, reduced_bitmask_int);
     
     return _reduced_bitmask_int;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <torch/torch.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <cmath>
 #include <vector>
@@ -16,7 +17,8 @@ __global__ void count_kernel(int N, const int *__restrict__ data,
 }
 
 void count_wrapper(int N, const int *data, int *out) {
-  count_kernel<<<ceil((double)N / 512), 512>>>(N, data, out);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+  count_kernel<<<ceil((double)N / 512), 512, 0, stream>>>(N, data, out);
 }
 
 // make sure indices is int type
