@@ -1,13 +1,16 @@
-# These version constraints come from Zendar's internal libraries that
-# require this package, just to reduce the chance of version
-# inconsistencies.
+# Keep these version constraints consistent with Zendar's
+# internal libraries that require this package to reduce
+# the chance of version inconsistencies.
 
-[[tool.pdm.source]]
+[[tool.uv.index]]
+name = "pytorch-cu128"
 url = "https://download.pytorch.org/whl/cu128"
-verify_ssl = true
-name = "torch-cu128"
-type = "find-links"
+explicit = true
 
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu128" }
+]
 
 [project]
 name = "torchsparseplusplus"
@@ -28,17 +31,25 @@ readme = "README.md"
 license = {text = "MIT"}
 dynamic = ["version"]
 
+[project.optional-dependencies]
+dev = [
+    "twine"
+]
+
 [tool.setuptools.dynamic]
 version = {attr = "torchsparseplusplus.__version__"}
+
+[tool.setuptools]
+include-package-data = true
 
 [build-system]
 requires = [
     "torch==2.7.1+cu128",
-    "tqdm", "numpy",
+    "tqdm",
+    "numpy",
     "setuptools",
     "wheel",
     "rootpath",
     "attributedict",
     "typing-extensions",
-    "twine"
 ]
