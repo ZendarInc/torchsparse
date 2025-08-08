@@ -1,13 +1,15 @@
 PYTHON ?= python3.11
 UV_BIN ?= $(HOME)/.local/bin/uv
 ZEN_UV_VERSION ?= 0.7.5
+TWINE ?= .venv/bin/twine
 V ?= 0
 
 ifeq ($(V),1)
   $(info Running in VERBOSE mode)
-  UV := UV_LOG=debug $(UV_BIN)
+  UV := MAX_JOBS=8 UV_LOG=debug $(UV_BIN)
+  TWINE_VERBOSE := --verbose
 else
-  UV := $(UV_BIN)
+  UV := MAX_JOBS=8 $(UV_BIN)
 endif
 
 
@@ -15,16 +17,16 @@ endif
 # Make commands:
 ###########################################
 
-$(UV):
+$(UV_BIN):
 	curl --proto '=https' --tlsv1.2 -LsSf https://astral.sh/uv/$(ZEN_UV_VERSION)/install.sh | sh
 
-.venv: uv.lock $(UV) ensure_env
+.venv: uv.lock $(UV_BIN) ensure_env
 	@set -e; \
-		MAX_JOBS=8 $(UV) sync
+		$(UV) sync
 		touch .venv # touch to update the timestamp
 
 .PHONY: init
-init: $(UV)
+init: $(UV_BIN)
 	$(UV) self update $(ZEN_UV_VERSION)
 
 DEFAULT_CUDA_PATH ?= /usr/local/cuda
@@ -64,14 +66,18 @@ check:
 lock:
 	$(UV) lock
 
-.PHONY:
-upload:
+$(TWINE):
 	$(UV) pip install .[dev]
-	TWINE_PASSWORD=$(gcloud auth print-access-token)  twine upload \
-	--repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ \
-	--username oauth2accesstoken \
-	dist/*
+
+.PHONY: upload
+upload: $(TWINE)
+	@TWINE_USERNAME=oauth2accesstoken \
+	TWINE_PASSWORD=$$(gcloud auth print-access-token) \
+	$(TWINE) upload $(TWINE_VERBOSE) \
+	  --non-interactive \
+	  --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ \
+	  dist/*
 
 .PHONY: build
 build: dep
-	MAX_JOBS=8 $(UV) build
+	$(UV) build
