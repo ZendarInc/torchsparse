@@ -16,20 +16,7 @@ This guide outlines how to build TorchSparse wheels, particularly when upgrading
 
 ## 🔧 Building TorchSparse
 
-### 1. Install PDM (Python Development Master)
-
-TorchSparse builds require [PDM](https://pdm-project.org/). To install it:
-
-```bash
-curl -sSL -o install-pdm.py https://raw.githubusercontent.com/pdm-project/pdm/2.5.3/install-pdm.py
-python3 install-pdm.py --version 2.5.3 --path /tmp
-```
-
-> This installs PDM in `/tmp/bin/pdm`.
-
----
-
-### 2. Create a New Branch
+### 1. Create a New Branch
 
 Create a new branch off of `zendar-main` for your changes:
 
@@ -39,12 +26,22 @@ git checkout -b build/torchsparse-new-version zendar-main
 
 ---
 
-### 3. Update Dependencies
+### 2. Update Dependencies
 
 Update `pyproject.toml` if dependencies have changed:
 
 - Modify the `dependencies` section.
 - Also update the `[build-system] requires` section to reflect the correct PyTorch version.
+```bash
+# if you've updated the file, run uv sync
+make lock
+```
+
+---
+
+### 3. Update Version
+
+Update the TorchSparse version in `torchsparse/version.py`.
 
 ---
 
@@ -56,7 +53,7 @@ Set the correct CUDA environment and run the build:
 export CUDA_PATH=/usr/local/cuda # Make sure this is the correct CUDA version for PyTorch
 export LD_LIBRARY_PATH=${CUDA_PATH}/lib64
 
-/tmp/bin/pdm sync --clean
+make build
 ```
 
 #### Troubleshooting
@@ -75,7 +72,7 @@ export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRAR
 - Re-run the build with verbosity enabled to help diagnose issues:
 
 ```bash
-/tmp/bin/pdm sync --clean -v
+make V=1
 ```
 
 - If you encounter `nvcc` errors, check that the correct compiler is being used.
@@ -83,51 +80,25 @@ export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64${LD_LIBRARY_PATH:+:${LD_LIBRAR
 
 ---
 
-### 5. Update Version
+### 6. Submit Changes
 
-Update the TorchSparse version in `torchsparse/version.py`.
-
----
-
-### 6. Build the Wheel
-
-Build the new wheels:
-
-```bash
-/tmp/bin/pdm build
-
-# if build dies due to out of memory (oom), limit parallelism with:
-export MAX_JOBS=4
-```
-
----
-
-### 7. Submit Changes
-
-- Open a Pull Request targeting `zendar-main`.
+- Open a Pull Request targeting `zendar-main` branch in `ZendarInc` org.
 - After review and approval, merge the PR.
 
 ---
 
-### 8. Create a Release
+### 7. Create a Release
 
 Tag a new release and upload the built wheels under the release assets.
 
 ---
 
-## 9. Upload to GCP Artifact Repository
+## 8. Upload to GCP Artifact Repository
 
 We recently switched to a package registry hosted in GCP, so to upload your package to the registry, make sure you are signed in with `gcloud auth application-default login` and then use twine to upload your new release.
 
 ```bash
-TWINE_PASSWORD=$(gcloud auth print-access-token)  /tmp/bin/pdm run twine upload --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ --username oauth2accesstoken dist/*
-
-# if above fails with "twine: no such command" try running in the venv and "pip install" it
-source /tmp/venv/bin/activate
-which twine # if not installed...
-pip install twine
-# run above command, then don't forget:
-deactivate
+make upload
 ```
 
 That’s it! 🎉
