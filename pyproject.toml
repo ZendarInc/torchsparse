@@ -31,11 +31,6 @@ readme = "README.md"
 license = {text = "MIT"}
 dynamic = ["version"]
 
-[project.optional-dependencies]
-dev = [
-    "twine"
-]
-
 [tool.setuptools.dynamic]
 version = {attr = "torchsparseplusplus.__version__"}
 
