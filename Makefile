@@ -4,7 +4,6 @@ SHELL := bash
 
 UV_BIN ?= $(HOME)/.local/bin/uv
 ZEN_UV_VERSION ?= 0.7.5
-TWINE ?= $(HOME)/.local/bin/twine
 V ?= 0
 
 ifeq ($(V),1)
@@ -43,17 +42,16 @@ check:
 lock:
 	$(UV) lock
 
-$(TWINE):
-	$(UV) tool install twine
-
 build: dep
 	$(UV) build
 
-upload: $(TWINE)
+upload:
 	@command -v gcloud >/dev/null || { echo "gcloud not found"; exit 1; }
 	@test -n "$$(ls -1 dist 2>/dev/null)" || { echo "No files in dist/"; exit 1; }
+	$(UV) sync --only-dev
 	TWINE_USERNAME=oauth2accesstoken \
 	TWINE_PASSWORD=$$(gcloud auth print-access-token) \
-	$(TWINE) upload $(TWINE_VERBOSE) --non-interactive \
-	  --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ \
-	  dist/*
+	$(UV) run twine upload $(TWINE_VERBOSE) \
+	--non-interactive \
+	--repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ \
+	dist/*

@@ -48,3 +48,8 @@ requires = [
     "attributedict",
     "typing-extensions",
 ]
+
+[dependency-groups]
+dev = [
+    "twine>=6.1.0",
+]
