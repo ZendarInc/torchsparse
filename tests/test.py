@@ -1,5 +1,7 @@
 import unittest
+import torch
 from torchsparseplusplus.nn import functional as F
+from concurrent.futures import ThreadPoolExecutor
 from python import (
     test_single_layer_convolution_forward,
     test_to_dense_forward,
@@ -45,6 +47,68 @@ class ToDenseTestCase(unittest.TestCase):
     def test_to_dense(self):
         max_adiff = test_to_dense_forward()
         self.assertLessEqual(max_adiff, 1e-5)
+
+
+class StreamsTestCase(unittest.TestCase):
+    def test_multi_streams(self):
+        stream = torch.cuda.Stream()
+
+        with torch.cuda.stream(stream):
+            kernel_sizes = [2, 3, 5]
+            strides = [1, 2, 3]
+            acc_adiff = 0.0
+            acc_rdiff = 0.0
+            count = 0
+
+            # hashmap mode by default
+            for kernel_size in kernel_sizes:
+                for stride in strides:
+                    mean_adiff, max_rdiff = test_single_layer_convolution_forward(
+                        kernel_size=kernel_size, stride=stride
+                    )
+                    acc_adiff += mean_adiff
+                    acc_rdiff += max_rdiff
+                    count += 1
+
+            self.assertLessEqual(acc_adiff / count, 1e-4)
+            self.assertLessEqual(acc_rdiff / count, 1e-2)
+
+
+class ThreadedStreamsTestCase(unittest.TestCase):
+    def worker(self, stream):
+        with torch.cuda.stream(stream):
+            kernel_sizes = [2, 3, 5]
+            strides = [1, 2, 3]
+            acc_adiff = 0.0
+            acc_rdiff = 0.0
+            count = 0
+
+            # hashmap mode by default
+            for kernel_size in kernel_sizes:
+                for stride in strides:
+                    mean_adiff, max_rdiff = test_single_layer_convolution_forward(
+                        kernel_size=kernel_size, stride=stride
+                    )
+                    acc_adiff += mean_adiff
+                    acc_rdiff += max_rdiff
+                    count += 1
+
+            stream.synchronize()
+
+            return acc_adiff, acc_rdiff, count
+
+    def test_multi_streams(self):
+        with ThreadPoolExecutor(max_workers=2) as w:
+            r0 = w.submit(self.worker, torch.cuda.Stream())
+            r1 = w.submit(self.worker, torch.cuda.Stream())
+
+            acc_adiff, acc_rdiff, count = r0.result()
+            self.assertLessEqual(acc_adiff / count, 1e-4)
+            self.assertLessEqual(acc_rdiff / count, 1e-2)
+
+            acc_adiff, acc_rdiff, count = r1.result()
+            self.assertLessEqual(acc_adiff / count, 1e-4)
+            self.assertLessEqual(acc_rdiff / count, 1e-2)
 
 
 if __name__ == "__main__":
