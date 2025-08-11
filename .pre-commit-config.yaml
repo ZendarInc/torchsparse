@@ -54,10 +54,10 @@ repos:
       - id: mypy
         name: (Python) Check with mypy
         additional_dependencies: [tokenize-rt]
-  - repo: local
-    hooks:
-      - id: clang-format
-        name: (C/C++/CUDA) Format with clang-format
-        entry: clang-format -style=google -i
-        language: system
-        files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
+#  - repo: local
+#    hooks:
+#      - id: clang-format
+#        name: (C/C++/CUDA) Format with clang-format
+#        entry: clang-format -style=google -i
+#        language: system
+#        files: \.(h\+\+|h|hh|hxx|hpp|cuh|c|cc|cpp|cu|c\+\+|cxx|tpp|txx)$
