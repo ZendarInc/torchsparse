@@ -93,22 +93,24 @@ class ThreadedStreamsTestCase(unittest.TestCase):
                     acc_rdiff += max_rdiff
                     count += 1
 
-            stream.synchronize()
-
             return acc_adiff, acc_rdiff, count
 
     def test_multi_streams(self):
-        with ThreadPoolExecutor(max_workers=2) as w:
-            r0 = w.submit(self.worker, torch.cuda.Stream())
-            r1 = w.submit(self.worker, torch.cuda.Stream())
+        n_workers = 20
 
-            acc_adiff, acc_rdiff, count = r0.result()
-            self.assertLessEqual(acc_adiff / count, 1e-4)
-            self.assertLessEqual(acc_rdiff / count, 1e-2)
+        with ThreadPoolExecutor(max_workers=n_workers) as w:
+            results = []
 
-            acc_adiff, acc_rdiff, count = r1.result()
-            self.assertLessEqual(acc_adiff / count, 1e-4)
-            self.assertLessEqual(acc_rdiff / count, 1e-2)
+            for _ in range(n_workers):
+                r = w.submit(self.worker, torch.cuda.Stream())
+                results.append(r)
+
+            for i in range(n_workers):
+                r = results[i]
+
+                acc_adiff, acc_rdiff, count = r.result()
+                self.assertLessEqual(acc_adiff / count, 1e-4)
+                self.assertLessEqual(acc_rdiff / count, 1e-2)
 
 
 if __name__ == "__main__":
