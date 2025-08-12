@@ -1,7 +1,9 @@
-PYTHON ?= python3.11
+# Fail-fast shell for all recipes
+SHELL := bash
+.SHELLFLAGS := -e -o pipefail -c
+
 UV_BIN ?= $(HOME)/.local/bin/uv
 ZEN_UV_VERSION ?= 0.7.5
-TWINE ?= .venv/bin/twine
 V ?= 0
 
 ifeq ($(V),1)
@@ -12,72 +14,44 @@ else
   UV := MAX_JOBS=8 $(UV_BIN)
 endif
 
-
-###########################################
-# Make commands:
-###########################################
+.DEFAULT_GOAL := dep
+.PHONY: dep init check lock build upload ensure_env
 
 $(UV_BIN):
 	curl --proto '=https' --tlsv1.2 -LsSf https://astral.sh/uv/$(ZEN_UV_VERSION)/install.sh | sh
 
-.venv: uv.lock $(UV_BIN) ensure_env
-	@set -e; \
-		$(UV) sync
-		touch .venv # touch to update the timestamp
-
-.PHONY: init
 init: $(UV_BIN)
 	$(UV) self update $(ZEN_UV_VERSION)
 
-DEFAULT_CUDA_PATH ?= /usr/local/cuda
-LD_LIBRARY_PATH ?= $(DEFAULT_CUDA_PATH)/lib64
-.PHONY: ensure_env
 ensure_env:
 	@echo "Checking environment variables..."
 	@missing=0; \
-	if [ -z "$$CUDA_PATH" ]; then \
-		echo "-- CUDA_PATH not set. Try this:"; \
-                echo "export CUDA_PATH=$(DEFAULT_CUDA_PATH)"; \
-		missing=1; \
-	else \
-		echo "-- CUDA_PATH is set to $$CUDA_PATH"; \
-	fi; \
-	if [ -z "$$LD_LIBRARY_PATH" ]; then \
-		echo "-- LD_LIBRARY_PATH not set. Try this:"; \
-                echo "export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH)"; \
-		missing=1; \
-	else \
-		echo "-- LD_LIBRARY_PATH is set to $$LD_LIBRARY_PATH"; \
-	fi; \
-	if [ "$$missing" -eq 1 ]; then \
-		echo "Aborting build due to missing environment variables."; \
-		exit 1; \
-	fi
+	[ -z "$$CUDA_PATH" ] && { echo "-- NOT FOUND! Try: export CUDA_PATH=/usr/local/cuda"; missing=1; } || echo "-- CUDA_PATH=$$CUDA_PATH"; \
+	[ -z "$$LD_LIBRARY_PATH" ] && { echo "-- NOT FOUND! Try: export LD_LIBRARY_PATH=\$$CUDA_PATH/lib64"; missing=1; } || echo "-- LD_LIBRARY_PATH=$$LD_LIBRARY_PATH"; \
+	[ "$$missing" -eq 0 ] || { echo "Aborting due to missing env"; exit 1; }
 
-.PHONY: dep
-.DEFAULT_GOAL := dep
+.venv: uv.lock $(UV_BIN) ensure_env
+	$(UV) sync
+	touch .venv
+
 dep: init .venv
 
-.PHONY: check
 check:
 	$(UV) lock --check
 
-.PHONY: lock
 lock:
 	$(UV) lock
 
-$(TWINE):
-	$(UV) pip install .[dev]
+build: dep
+	$(UV) build
 
-.PHONY: upload
-upload: $(TWINE)
-	@TWINE_USERNAME=oauth2accesstoken \
+upload:
+	@command -v gcloud >/dev/null || { echo "gcloud not found"; exit 1; }
+	@test -n "$$(ls -1 dist 2>/dev/null)" || { echo "No files in dist/"; exit 1; }
+	$(UV) sync --only-dev
+	TWINE_USERNAME=oauth2accesstoken \
 	TWINE_PASSWORD=$$(gcloud auth print-access-token) \
-	$(TWINE) upload $(TWINE_VERBOSE) \
+	$(UV) run twine upload $(TWINE_VERBOSE) \
 	  --non-interactive \
 	  --repository-url https://us-central1-python.pkg.dev/artifacts-443721/python-packages/ \
 	  dist/*
-
-.PHONY: build
-build: dep
-	$(UV) build

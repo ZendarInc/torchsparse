@@ -27,11 +27,6 @@ readme = "README.md"
 license = {text = "MIT"}
 dynamic = ["version"]
 
-[project.optional-dependencies]
-dev = [
-    "twine"
-]
-
 [tool.setuptools.dynamic]
 version = {attr = "torchsparse.__version__"}
 
@@ -44,4 +39,9 @@ requires = [
     "tqdm",
     "numpy",
     "setuptools",
+]
+
+[dependency-groups]
+dev = [
+    "twine>=6.1.0",
 ]

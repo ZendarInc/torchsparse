@@ -655,7 +655,7 @@ dependencies = [
     { name = "tqdm" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "twine" },
 ]
@@ -666,9 +666,10 @@ requires-dist = [
     { name = "setuptools" },
     { name = "torch", specifier = "==2.7.1+cu128", index = "https://download.pytorch.org/whl/cu128" },
     { name = "tqdm" },
-    { name = "twine", marker = "extra == 'dev'" },
 ]
-provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "twine", specifier = ">=6.1.0" }]
 
 [[package]]
 name = "tqdm"
