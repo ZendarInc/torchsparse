@@ -121,6 +121,8 @@ __global__ void downsample_hashmap_kmap_stage3(type_hashtable_device_view table,
   int opt_coords = in_out_in_map[tidx];
   if(opt_coords >= 0){
     int oidx = table.lookup(opt_coords + 1) - 1;
+    if (oidx < 0)
+      return;
     //if(oidx < 0 || oidx >= n_points_out) printf("%d %d\n", opt_coords, oidx);
     out_in_map[oidx * kernel_volume + kernel_volume - 1 - kernel_idx] = idx;
   }

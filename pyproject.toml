@@ -1,12 +1,6 @@
-# These version constraints come from Zendar's internal libraries that
-# require this package, just to reduce the chance of version
-# inconsistencies.
-
-[[tool.pdm.source]]
-url = "https://download.pytorch.org/whl/cu128"
-verify_ssl = true
-name = "torch-cu128"
-type = "find-links"
+# Keep these version constraints consistent with Zendar's
+# internal libraries that require this package to reduce
+# the chance of version inconsistencies.
 
 [[tool.uv.index]]
 name = "pytorch-cu128"
@@ -15,15 +9,6 @@ explicit = true
 
 [tool.uv.sources]
 torch = [
-  { index = "pytorch-cu128" }
-]
-nvidia-nccl-cu12 = [
-  { index = "pytorch-cu128" }
-]
-nvidia-cuda-cupti-cu12 = [
-  { index = "pytorch-cu128" }
-]
-torchvision = [
   { index = "pytorch-cu128" }
 ]
 
@@ -49,14 +34,22 @@ dynamic = ["version"]
 [tool.setuptools.dynamic]
 version = {attr = "torchsparseplusplus.__version__"}
 
+[tool.setuptools]
+include-package-data = true
+
 [build-system]
 requires = [
     "torch==2.7.1+cu128",
-    "tqdm", "numpy",
+    "tqdm",
+    "numpy",
     "setuptools",
     "wheel",
     "rootpath",
     "attributedict",
     "typing-extensions",
-    "twine"
+]
+
+[dependency-groups]
+dev = [
+    "twine>=6.1.0",
 ]
