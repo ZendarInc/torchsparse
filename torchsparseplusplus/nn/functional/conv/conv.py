@@ -60,7 +60,7 @@ def conv3d(
         config.ifsort = False
         assert 0, "CodedCSR has not been integrated."
     else:
-        raise ValueError("unsupported dataflow: {}".format(dataflow))
+        raise ValueError(f"unsupported dataflow: {dataflow}")
 
     if kernel_size == (1, 1, 1) and stride == (1, 1, 1) and dilation == (1, 1, 1):
         feats = feats.matmul(weight)

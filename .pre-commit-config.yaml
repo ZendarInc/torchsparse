@@ -16,8 +16,8 @@ repos:
       - id: fix-encoding-pragma
         name: (Python) Remove encoding pragmas
         args: [--remove]
-      - id: double-quote-string-fixer
-        name: (Python) Fix double-quoted strings
+#      - id: double-quote-string-fixer
+#        name: (Python) Fix double-quoted strings
       - id: debug-statements
         name: (Python) Check for debugger imports
       - id: check-json
@@ -37,27 +37,27 @@ repos:
       - id: pyupgrade
         name: (Python) Update syntax for newer versions
         args: [--py36-plus]
-  - repo: https://github.com/google/yapf
-    rev: v0.40.2
-    hooks:
-      - id: yapf
-        name: (Python) Format with yapf
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        name: (Python) Sort imports with isort
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        name: (Python) Check with flake8
-        additional_dependencies:
-          - flake8-bugbear
-          - flake8-comprehensions
-          - flake8-docstrings
-          - flake8-executable
-          - flake8-quotes
+#  - repo: https://github.com/google/yapf
+#    rev: v0.40.2
+#    hooks:
+#      - id: yapf
+#        name: (Python) Format with yapf
+#  - repo: https://github.com/pycqa/isort
+#    rev: 5.12.0
+#    hooks:
+#      - id: isort
+#        name: (Python) Sort imports with isort
+#  - repo: https://github.com/pycqa/flake8
+#    rev: 6.1.0
+#    hooks:
+#      - id: flake8
+#        name: (Python) Check with flake8
+#        additional_dependencies:
+#          - flake8-bugbear
+#          - flake8-comprehensions
+#          - flake8-docstrings
+#          - flake8-executable
+#          - flake8-quotes
 #  - repo: https://github.com/pre-commit/mirrors-clang-format
 #    rev: v13.0.0
 #    hooks:

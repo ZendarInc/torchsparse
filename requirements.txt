@@ -1,7 +1,7 @@
+attributedict
 backports.cached_property
 numpy
+rootpath
 tqdm
 typing-extensions
 wheel
-attributedict
-rootpath

@@ -8,7 +8,7 @@
 
 __global__ void __launch_bounds__(thd_num) reorder_out_in_map_kernel(
     int* __restrict__ out_in_map,
-    int* __restrict__ reorder_loc, 
+    int* __restrict__ reorder_loc,
     int M, // node num
     int kernel_volume,
     int split_mask_len,
@@ -45,6 +45,6 @@ at::Tensor reorder_out_in_map_cuda(
 
     reorder_out_in_map_kernel<<<(M + cta_M - 1) / cta_M * kernel_volume, cta_M, 0, stream>>>(
         out_in_map, reorder_loc, M, kernel_volume, split_mask_len, reorder_out_in_map);
-    
+
     return _reorder_out_in_map;
-} 
+}
