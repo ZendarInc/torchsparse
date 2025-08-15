@@ -1,5 +1,6 @@
 #include <torch/extension.h>
 #include <torch/torch.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -63,7 +64,7 @@ __host__ __device__ int get_output_coords(int kernel_volume, int *in_coords,
                                           int *kernel_sizes, int *stride,
                                           int *coords_min,
                                           int *coords_max,
-                                          int *padding, 
+                                          int *padding,
                                           int *out_coords) {
   int point_counter = 0;
   int upper[NDim - 1], lower[NDim - 1], counter[NDim - 1], cur;
@@ -147,7 +148,7 @@ Idea: launch get_output_coords_kernel then inverse_transform_coords_kernel
 at::Tensor downsample_cuda(at::Tensor _in_coords, at::Tensor _coords_max,
                            at::Tensor _coords_min, at::Tensor _kernel_sizes,
                            at::Tensor _stride, at::Tensor _padding) {
-  
+
   int N = _in_coords.size(0);
   int kernel_volume = (int)(torch::prod(_kernel_sizes).item<int>());
   int *in_coords = _in_coords.data_ptr<int>();
@@ -156,6 +157,7 @@ at::Tensor downsample_cuda(at::Tensor _in_coords, at::Tensor _coords_max,
   int *kernel_sizes = _kernel_sizes.data_ptr<int>();
   int *stride = _stride.data_ptr<int>();
   int *padding = _padding.data_ptr<int>();
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
 
   at::Tensor _out_coords_transformed = torch::zeros({kernel_volume * N}, torch::TensorOptions()
                                             .dtype(at::ScalarType::Long)
@@ -163,10 +165,10 @@ at::Tensor downsample_cuda(at::Tensor _in_coords, at::Tensor _coords_max,
   at::Tensor _n_out_points = torch::zeros({1}, torch::TensorOptions()
                                        .dtype(at::ScalarType::Int)
                                        .device(_in_coords.device()));
-  
+
   int* n_out_points = _n_out_points.data_ptr<int>();
 
-  get_output_coords_kernel<<<int(ceil((double)N / 256)), 256>>>(
+  get_output_coords_kernel<<<int(ceil((double)N / 256)), 256, 0, stream>>>(
       N, kernel_volume, in_coords, kernel_sizes, stride,
       coords_min, coords_max, padding,
       n_out_points, _out_coords_transformed.data_ptr<long>());
@@ -182,7 +184,7 @@ at::Tensor downsample_cuda(at::Tensor _in_coords, at::Tensor _coords_max,
                                                .device(_in_coords.device()));
   int* out_coords = _out_coords.data_ptr<int>();
 
-  inverse_transform_coords_kernel<<<int(ceil((double)num_out_points / 256)), 256>>>(
+  inverse_transform_coords_kernel<<<int(ceil((double)num_out_points / 256)), 256, 0, stream>>>(
       num_out_points, _out_coords_transformed.data_ptr<long>(),
       coords_min, coords_max, out_coords);
 

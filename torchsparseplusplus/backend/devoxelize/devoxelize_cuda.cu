@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <thrust/device_vector.h>
 #include <torch/extension.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <THC/THCAtomics.cuh>
 
@@ -64,12 +65,14 @@ at::Tensor devoxelize_forward_cuda(const at::Tensor feat,
   int c = feat.size(1);
   int N = indices.size(0);
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   at::Tensor out =
       torch::zeros({N, c}, at::device(feat.device()).dtype(feat.dtype()));
 
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       feat.scalar_type(), "devoxelize_forward_cuda", ([&] {
-        devoxelize_forward_kernel<scalar_t><<<N, c>>>(
+        devoxelize_forward_kernel<scalar_t><<<N, c, 0, stream>>>(
             N, c, indices.data_ptr<int>(), weight.data_ptr<scalar_t>(),
             feat.data_ptr<scalar_t>(), out.data_ptr<scalar_t>());
       }));
@@ -84,12 +87,15 @@ at::Tensor devoxelize_backward_cuda(const at::Tensor top_grad,
                                     const at::Tensor weight, int n) {
   int c = top_grad.size(1);
   int N = top_grad.size(0);
+
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   at::Tensor bottom_grad = torch::zeros(
       {n, c}, at::device(top_grad.device()).dtype(top_grad.dtype()));
 
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       top_grad.scalar_type(), "devoxelize_backward_cuda", ([&] {
-        devoxelize_backward_kernel<scalar_t><<<N, c>>>(
+        devoxelize_backward_kernel<scalar_t><<<N, c, 0, stream>>>(
             N, n, c, indices.data_ptr<int>(), weight.data_ptr<scalar_t>(),
             top_grad.data_ptr<scalar_t>(), bottom_grad.data_ptr<scalar_t>());
       }));

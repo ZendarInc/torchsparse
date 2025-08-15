@@ -124,7 +124,7 @@ def build_kernel_map(
 
         else:
             raise ValueError(
-                "[Build kernel map] unsupported dataflow: {}".format(dataflow)
+                f"[Build kernel map] unsupported dataflow: {dataflow}"
             )
 
     elif mode == "hashmap":
@@ -178,14 +178,14 @@ def build_kernel_map(
 
         else:
             raise ValueError(
-                "[Build kernel map] unsupported dataflow: {}".format(dataflow)
+                f"[Build kernel map] unsupported dataflow: {dataflow}"
             )
 
     elif mode == "grid":
         assert 0, "grid mode is temporarily deprecated."
 
     else:
-        raise ValueError("[Build kernel map] unknown mode: {}".format(mode))
+        raise ValueError(f"[Build kernel map] unknown mode: {mode}")
 
     if dataflow == Dataflow.ImplicitGEMM:
         if training:

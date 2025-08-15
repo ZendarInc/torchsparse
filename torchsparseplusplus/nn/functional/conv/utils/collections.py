@@ -68,7 +68,7 @@ class AttributeDict(dict):
         entries = entries or {}
         entries = self._reject_reserved_keys(entries)
 
-        super(AttributeDict, self).__init__(entries)
+        super().__init__(entries)
 
         self.update(entries)
 
@@ -379,9 +379,9 @@ if __name__ == "__main__":
 
     object = AttributeDict(data)
 
-    print("object = AttributeDict({0})\n".format(data))
+    print(f"object = AttributeDict({data})\n")
 
-    print("object\n\n\t{0}\n".format(object))
-    print("object.a\n\n\t{0}\n".format(object.a))
-    print("object.a.b\n\n\t{0}\n".format(object.a.b))
-    print("object.a.b.c\n\n\t{0}\n".format(object.a.b.c))
+    print(f"object\n\n\t{object}\n")
+    print(f"object.a\n\n\t{object.a}\n")
+    print(f"object.a.b\n\n\t{object.a.b}\n")
+    print(f"object.a.b.c\n\n\t{object.a.b.c}\n")

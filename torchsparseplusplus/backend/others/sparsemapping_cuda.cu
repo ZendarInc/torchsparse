@@ -1,5 +1,6 @@
 #include <torch/extension.h>
 #include <torch/torch.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -281,18 +282,21 @@ std::vector<at::Tensor> build_kernel_map_subm_hashmap_int32(
   int n_points_pad = (n_points + divisor - 1) / divisor * divisor;
   at::Tensor _out_in_map = torch::full({n_points_pad, kernel_volume}, -1, options);
   int *out_in_map = _out_in_map.data_ptr<int>();
+
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   // stage1: insert to hashmap
   if (to_insert)
-    subm_hashmap_kmap_stage1<hashtable32::device_view, int32_t><<<(int)ceil((double)n_points / 256), 256>>>(
+    subm_hashmap_kmap_stage1<hashtable32::device_view, int32_t><<<(int)ceil((double)n_points / 256), 256, 0, stream>>>(
         table.get_device_view(), n_points, kernel_volume, in_coords, coords_min, coords_max, out_coords);
   // stage2: query
   if (kernel_volume % 2 != 0){
-    subm_hashmap_kmap_stage2_odd_kernel<hashtable32::device_view, int32_t><<<(int)ceil((double)n_points * (kernel_volume / 2) / 256), 256>>>(
+    subm_hashmap_kmap_stage2_odd_kernel<hashtable32::device_view, int32_t><<<(int)ceil((double)n_points * (kernel_volume / 2) / 256), 256, 0, stream>>>(
         table.get_device_view(), n_points, kernel_volume, in_coords, coords_min, coords_max,
         kernel_sizes, out_in_map);  // only support odd kernel shapes
   }
   else {
-    subm_hashmap_kmap_stage2_even_kernel<hashtable32::device_view, int32_t><<<(int)ceil((double)n_points * (kernel_volume) / 256), 256>>>(
+    subm_hashmap_kmap_stage2_even_kernel<hashtable32::device_view, int32_t><<<(int)ceil((double)n_points * (kernel_volume) / 256), 256, 0, stream>>>(
         table.get_device_view(), n_points, kernel_volume, in_coords, coords_min, coords_max,
         kernel_sizes, out_in_map);  // only support even kernel shapes
   }
@@ -328,18 +332,19 @@ std::vector<at::Tensor> build_kernel_map_subm_hashmap(
   int n_points_pad = (n_points + divisor - 1) / divisor * divisor;
   at::Tensor _out_in_map = torch::full({n_points_pad, kernel_volume}, -1, options);
   int *out_in_map = _out_in_map.data_ptr<int>();
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
   // stage1: insert to hashmap
   if (to_insert)
-    subm_hashmap_kmap_stage1<hashtable::device_view, int64_t><<<(int)ceil((double)n_points / 256), 256>>>(
+    subm_hashmap_kmap_stage1<hashtable::device_view, int64_t><<<(int)ceil((double)n_points / 256), 256, 0, stream>>>(
         table.get_device_view(), n_points, kernel_volume, in_coords, coords_min, coords_max, out_coords);
   // stage2: query
   if (kernel_volume % 2 != 0){
-    subm_hashmap_kmap_stage2_odd_kernel<hashtable::device_view, int64_t><<<(int)ceil((double)n_points * (kernel_volume / 2) / 256), 256>>>(
+    subm_hashmap_kmap_stage2_odd_kernel<hashtable::device_view, int64_t><<<(int)ceil((double)n_points * (kernel_volume / 2) / 256), 256, 0, stream>>>(
         table.get_device_view(), n_points, kernel_volume, in_coords, coords_min, coords_max,
         kernel_sizes, out_in_map);  // only support odd kernel shapes
   }
   else {
-    subm_hashmap_kmap_stage2_even_kernel<hashtable::device_view, int64_t><<<(int)ceil((double)n_points * (kernel_volume) / 256), 256>>>(
+    subm_hashmap_kmap_stage2_even_kernel<hashtable::device_view, int64_t><<<(int)ceil((double)n_points * (kernel_volume) / 256), 256, 0, stream>>>(
         table.get_device_view(), n_points, kernel_volume, in_coords, coords_min, coords_max,
         kernel_sizes, out_in_map);  // only support even kernel shapes
   }
@@ -366,6 +371,8 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap_int32(
                           .dtype(at::ScalarType::Int)
                           .device(_in_coords.device());
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   at::Tensor _out_kmap = torch::full({n_points, kernel_volume}, -1, options);
 
   at::Tensor _n_out_points = torch::zeros({1}, options);
@@ -382,14 +389,14 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap_int32(
   if (kernel_volume % 2 == 1)
   {
     downsample_grid_kmap_stage1_specialized_fast<int32_t, true><<<(int)ceil((double)(n_points * kernel_volume) / 256),
-                                              256>>>(
+                                              256, 0, stream>>>(
         n_points, kernel_volume, in_coords, kernel_sizes, stride,
         padding, coords_min, coords_max, n_out_points, transformed_out_coords, out_kmap);
   }
   else
   {
     downsample_grid_kmap_stage1_specialized_fast<int32_t, false><<<(int)ceil((double)(n_points * kernel_volume) / 256),
-                                              256>>>(
+                                              256, 0, stream>>>(
         n_points, kernel_volume, in_coords, kernel_sizes, stride,
         padding, coords_min, coords_max, n_out_points, transformed_out_coords, out_kmap);
   }
@@ -407,7 +414,7 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap_int32(
   at::Tensor final_out_coords =
       torch::zeros({n_out_points_scalar, NDim}, options);
   inverse_transform_coords_and_insert_kernel<<<
-      (int)ceil((double)n_out_points_scalar / 256), 256>>>(
+      (int)ceil((double)n_out_points_scalar / 256), 256, 0, stream>>>(
       table.get_device_view(), n_out_points_scalar, out_coords,
       coords_min, coords_max, final_out_coords.data_ptr<int>());
 
@@ -420,7 +427,7 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap_int32(
   int *out_in_map = _out_in_map.data_ptr<int>();
 
   downsample_hashmap_kmap_stage3<<<
-      (int)ceil((double)(n_points * kernel_volume) / 256), 256>>>(
+      (int)ceil((double)(n_points * kernel_volume) / 256), 256, 0, stream>>>(
       table.get_device_view(), n_points, n_out_points_scalar, kernel_volume, out_kmap,
       out_in_map);
 
@@ -461,17 +468,19 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap(
   divided coords_min/max) as follows:
   */
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   if (kernel_volume % 2 == 1)
   {
     downsample_grid_kmap_stage1_specialized_fast<int64_t, true><<<(int)ceil((double)(n_points * kernel_volume) / 256),
-                                              256>>>(
+                                              256, 0, stream>>>(
         n_points, kernel_volume, in_coords, kernel_sizes, stride,
         padding, coords_min, coords_max, n_out_points, transformed_out_coords, out_kmap);
   }
   else
   {
     downsample_grid_kmap_stage1_specialized_fast<int64_t, false><<<(int)ceil((double)(n_points * kernel_volume) / 256),
-                                              256>>>(
+                                              256, 0, stream>>>(
         n_points, kernel_volume, in_coords, kernel_sizes, stride,
         padding, coords_min, coords_max, n_out_points, transformed_out_coords, out_kmap);
   }
@@ -490,7 +499,7 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap(
   at::Tensor final_out_coords =
       torch::zeros({n_out_points_scalar, NDim}, options);
   inverse_transform_coords_and_insert_kernel<<<
-      (int)ceil((double)n_out_points_scalar / 256), 256>>>(
+      (int)ceil((double)n_out_points_scalar / 256), 256, 0, stream>>>(
       table.get_device_view(), n_out_points_scalar, out_coords,
       coords_min, coords_max, final_out_coords.data_ptr<int>());
   //table.insert_vals(_out_coords);
@@ -502,7 +511,7 @@ std::vector<at::Tensor> build_kernel_map_downsample_hashmap(
   int *out_in_map = _out_in_map.data_ptr<int>();
 
   downsample_hashmap_kmap_stage3<<<
-      (int)ceil((double)(n_points * kernel_volume) / 256), 256>>>(
+      (int)ceil((double)(n_points * kernel_volume) / 256), 256, 0, stream>>>(
       table.get_device_view(), n_points, n_out_points_scalar, kernel_volume, out_kmap,
       out_in_map);
   return {_out_in_map, final_out_coords};
@@ -527,6 +536,8 @@ std::vector<at::Tensor> build_mask_from_kmap(int n_points, int n_out_points,
   int *input_mask = _input_mask.data_ptr<int>();
   int *output_mask = _output_mask.data_ptr<int>();
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   int max_kmap_size = 1;
   if (kernel_volume % 2 == 1 && n_points == n_out_points) {
     max_kmap_size =
@@ -543,7 +554,7 @@ std::vector<at::Tensor> build_mask_from_kmap(int n_points, int n_out_points,
         *std::max_element(_kmap_sizes_cpu.data_ptr<int>(),
                           _kmap_sizes_cpu.data_ptr<int>() + kernel_volume);
   }
-  get_masks_from_kmap_kernel<<<ceil((double)max_kmap_size / 256), 256>>>(
+  get_masks_from_kmap_kernel<<<ceil((double)max_kmap_size / 256), 256, 0, stream>>>(
       n_points, n_out_points, kernel_volume, kmap, kmap_sizes, cum_kmap_sizes,
       input_mask, output_mask);
   return {_input_mask, _output_mask};

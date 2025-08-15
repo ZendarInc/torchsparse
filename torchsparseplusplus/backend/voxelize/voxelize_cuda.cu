@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <torch/torch.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <THC/THCAtomics.cuh>
 #include <cmath>
@@ -82,12 +83,14 @@ at::Tensor voxelize_forward_cuda(const at::Tensor inputs, const at::Tensor idx,
   int c = inputs.size(1);
   int N1 = counts.size(0);
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   at::Tensor out =
       torch::zeros({N1, c}, at::device(idx.device()).dtype(inputs.dtype()));
 
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       inputs.scalar_type(), "voxelize_forward_cuda", ([&]
-                                               { voxelize_forward_kernel<scalar_t><<<N, c>>>(
+                                               { voxelize_forward_kernel<scalar_t><<<N, c, 0, stream>>>(
                                                      N, c, N1, inputs.data_ptr<scalar_t>(), idx.data_ptr<int>(),
                                                      counts.data_ptr<int>(), out.data_ptr<scalar_t>()); }));
 
@@ -101,12 +104,14 @@ at::Tensor voxelize_backward_cuda(const at::Tensor top_grad,
   int c = top_grad.size(1);
   int N1 = counts.size(0);
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   at::Tensor bottom_grad =
       torch::zeros({N, c}, at::device(idx.device()).dtype(top_grad.dtype()));
 
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       top_grad.scalar_type(), "voxelize_backward_cuda", ([&]
-                                                  { voxelize_backward_kernel<scalar_t><<<N, c>>>(
+                                                  { voxelize_backward_kernel<scalar_t><<<N, c, 0, stream>>>(
                                                         N, c, N1, top_grad.data_ptr<scalar_t>(), idx.data_ptr<int>(),
                                                         counts.data_ptr<int>(), bottom_grad.data_ptr<scalar_t>()); }));
 
@@ -119,9 +124,11 @@ void to_dense_forward_cuda(const at::Tensor inputs, const at::Tensor idx,
   int N = inputs.size(0);
   int c = inputs.size(1);
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       inputs.scalar_type(), "to_dense_forward_cuda", ([&]
-                                               { to_dense_forward_kernel<scalar_t><<<(N * c + 255) / 256, 256>>>(
+                                               { to_dense_forward_kernel<scalar_t><<<(N * c + 255) / 256, 256, 0, stream>>>(
                                                      N, c, inputs.data_ptr<scalar_t>(), idx.data_ptr<int>(),
                                                      range.data_ptr<int>(), outputs.data_ptr<scalar_t>()); }));
 }
@@ -133,9 +140,11 @@ void to_dense_backward_cuda(const at::Tensor top_grad,
   int N = bottom_grad.size(0);
   int c = bottom_grad.size(1);
 
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       top_grad.scalar_type(), "to_dense_backward_cuda", ([&]
-                                                  { to_dense_backward_kernel<scalar_t><<<(N * c + 255) / 256, 256>>>(
+                                                  { to_dense_backward_kernel<scalar_t><<<(N * c + 255) / 256, 256, 0, stream>>>(
                                                         N, c, top_grad.data_ptr<scalar_t>(), idx.data_ptr<int>(),
                                                         range.data_ptr<int>(), bottom_grad.data_ptr<scalar_t>()); }));
 }

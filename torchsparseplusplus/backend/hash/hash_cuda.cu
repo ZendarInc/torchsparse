@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <torch/torch.h>
+#include <ATen/cuda/CUDAContext.h>
 
 #include <cmath>
 #include <vector>
@@ -55,12 +56,14 @@ __global__ void kernel_hash_kernel(int N, int K, const int *__restrict__ data,
 
 void kernel_hash_wrapper(int N, int K, const int *data,
                          const int *kernel_offset, int64_t *out) {
-  kernel_hash_kernel<<<ceil((double)(N * K) / 512), 512, K * 3 * sizeof(int)>>>(
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+  kernel_hash_kernel<<<ceil((double)(N * K) / 512), 512, K * 3 * sizeof(int), stream>>>(
       N, K, data, kernel_offset, out);
 }
 
 void hash_wrapper(int N, const int *data, int64_t *out) {
-  hash_kernel<<<ceil((double)N / 512), 512>>>(N, data, out);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream().stream();
+  hash_kernel<<<ceil((double)N / 512), 512, 0, stream>>>(N, data, out);
 }
 
 at::Tensor hash_cuda(const at::Tensor idx) {
