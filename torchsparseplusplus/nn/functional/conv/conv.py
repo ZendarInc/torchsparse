@@ -44,7 +44,7 @@ def conv3d(
     # TODO: Deal with kernel volume > 32. (Split mask or unsort)
 
     dataflow = config.dataflow
-    kmap_mode = config.kmap_mode
+    kmap_mode = "hashmap" #config.kmap_mode
 
     if dataflow == F.Dataflow.ImplicitGEMM:
         ConvolutionFunction = ImplicitGEMMConvolutionFuntion

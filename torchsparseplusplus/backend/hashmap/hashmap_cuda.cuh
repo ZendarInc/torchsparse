@@ -48,7 +48,8 @@ __device__ uint64_t hash_func_64b(dtype* data){
 
 template <typename key_type>
 __device__ int hash(key_type key, int _capacity){
-  return (uint64_t)key % _capacity;
+  int rem = (uint64_t)key % _capacity;
+  return (_capacity + rem) % _capacity;  // ensure non-negative
 }
 
 template <typename key_type>
@@ -208,6 +209,7 @@ __global__ void lookup_coords_kernel(
     int _kernel_idx = tidx % kernel_volume;
     int kernel_idx = _kernel_idx;
     int* in_coords = coords + 4 * idx;
+    if (idx >= n) return;
     int coords_out[4];
     coords_out[3] = in_coords[3];
 
