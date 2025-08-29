@@ -114,7 +114,7 @@ We recently switched to a package registry hosted in GCP, so to upload your pack
 make upload
 ```
 
-That’s it! 🎉
+That’s it! 🎉  If you run into issues (400 responses; ensure the files don't already exist in the registry.  Delete and re-upload if necessary)
 
 ______________________________________________________________________
 
