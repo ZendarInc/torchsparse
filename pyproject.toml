@@ -17,7 +17,7 @@ name = "torchsparse"
 description = ""
 authors = []
 dependencies = [
-    "torch==2.7.1+cu128",
+    "torch==2.10.0+cu128",
     "tqdm",
     "numpy",
     "setuptools",
@@ -35,7 +35,7 @@ include-package-data = true
 
 [build-system]
 requires = [
-    "torch==2.7.1+cu128",
+    "torch==2.10.0+cu128",
     "tqdm",
     "numpy",
     "setuptools",
