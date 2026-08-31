@@ -84,6 +84,7 @@ def build_kmap_implicit_GEMM_hashmap(
     kmap["out_in_map"] = results
     kmap["coords"] = coords
     kmap["sizes"] = (input_node_num, coords.shape[0])
+    kmap["spatial_range"] = spatial_range
 
     if ifsort:
         bitmask = torchsparseplusplus.backend.derive_bitmask_from_out_in_map(
