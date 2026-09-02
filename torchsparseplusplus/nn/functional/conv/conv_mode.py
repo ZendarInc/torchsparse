@@ -1,6 +1,6 @@
 from enum import Enum
 
-_global_kmap_mode = "hashmap_on_the_fly"  # or "hashmap"
+_global_kmap_mode = "hashmap"  # or "hashmap_on_the_fly"
 _global_downsample_mode = "spconv"  # or "minkowski"
 
 

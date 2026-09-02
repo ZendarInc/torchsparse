@@ -3,7 +3,7 @@ SHELL := bash
 .SHELLFLAGS := -e -o pipefail -c
 
 UV_BIN ?= $(HOME)/.local/bin/uv
-ZEN_UV_VERSION ?= 0.7.5
+ZEN_UV_VERSION ?= 0.11.8
 V ?= 0
 
 ifeq ($(V),1)
